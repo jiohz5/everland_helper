@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에버랜드 방문 내비게이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f7ff;--card:#fff;--text:#607080;--heading:#25396f;--muted:rgba(96,112,128,.75);--border:#dce7f1;--soft:#f2f7ff;
+  --primary:#435ebe;--primary-lt:#e6eaf8;--purple:#9694ff;--blue:#57caeb;--green:#5ddab4;--red:#ff7976;--yellow:#ffc434;
+  --success:#198754;--warning:#e09b00;--danger:#dc3545;--side:300px;
+}
+:root[data-theme="dark"]{
+  --bg:#151521;--card:#1e1e2d;--text:#a7a8b5;--heading:#e4e4ef;--muted:#7c7d8e;--border:#2b2b40;--soft:#232333;--primary-lt:#2a3157;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151521;--card:#1e1e2d;--text:#a7a8b5;--heading:#e4e4ef;--muted:#7c7d8e;--border:#2b2b40;--soft:#232333;--primary-lt:#2a3157;}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Nunito","Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:1rem;line-height:1.5}
+a{color:var(--primary);text-decoration:none}
+h3,h4,h5,h6{color:var(--heading);margin:0}
+/* sidebar */
+#sidebar{position:fixed;inset:0 auto 0 0;width:var(--side);background:var(--card);z-index:30;overflow-y:auto;transition:transform .25s}
+.sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:2rem 2rem 1rem}
+.logo{display:flex;align-items:center;gap:.5rem;font-size:1.35rem;font-weight:800;color:var(--primary)}
+.theme-toggle{display:flex;align-items:center;gap:.4rem;color:var(--text)}
+.switch{position:relative;width:2.2rem;height:1.2rem;border-radius:1rem;background:var(--border);border:0;cursor:pointer;padding:0}
+.switch:after{content:"";position:absolute;top:.15rem;left:.15rem;width:.9rem;height:.9rem;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s}
+:root[data-theme="dark"] .switch{background:var(--primary)} :root[data-theme="dark"] .switch:after{left:1.15rem}
+.sidebar-title{padding:0 2rem;margin:1.5rem 0 .6rem;font-weight:600;color:var(--heading);font-size:1rem}
+.menu{list-style:none;margin:0;padding:0 2rem}
+.sidebar-link{display:flex;align-items:center;gap:1rem;padding:.7rem 1rem;border-radius:.5rem;color:#25396f;font-weight:600;margin-bottom:.3rem;transition:background .15s}
+:root[data-theme="dark"] .sidebar-link{color:var(--text)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sidebar-link{color:var(--text)}}
+.sidebar-link i{color:#7c8db5;font-size:1.05rem}
+.sidebar-link:hover{background:var(--soft)}
+.sidebar-item.active .sidebar-link{background:var(--primary);color:#fff}
+.sidebar-item.active .sidebar-link i{color:#fff}
+.sidebar-foot{padding:1.5rem 2rem;font-size:.8rem;color:var(--muted)}
+/* main */
+#main{margin-left:var(--side);padding:2rem}
+.burger{display:none;background:none;border:0;font-size:1.8rem;color:var(--heading);cursor:pointer;padding:0;margin-bottom:.5rem}
+.page-heading{margin-bottom:2rem;display:flex;flex-wrap:wrap;align-items:flex-end;gap:.5rem 1rem}
+.page-heading h3{font-size:1.75rem;font-weight:700}
+.page-heading p{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:1.5rem;align-items:start}
+.col{display:flex;flex-direction:column;gap:1.5rem;min-width:0}
+.card{background:var(--card);border-radius:.7rem;border:0;min-width:0}
+.card-header{padding:1.5rem 1.5rem .5rem;display:flex;align-items:center;gap:.6rem}
+.card-header h4{font-size:1.2rem;font-weight:700}
+.card-header .meta{margin-left:auto;font-size:.8rem;color:var(--muted);text-align:right}
+.card-body{padding:1rem 1.5rem 1.5rem}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem}
+@media (min-width:1700px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stat{padding:1.5rem;display:flex;gap:1rem;align-items:flex-start}
+.stats-icon{width:3rem;height:3rem;border-radius:.5rem;display:grid;place-items:center;color:#fff;font-size:1.4rem;flex:none}
+.stats-icon.purple{background:var(--purple)}.stats-icon.blue{background:var(--blue)}.stats-icon.green{background:var(--green)}
+.stats-icon.red{background:var(--red)}.stats-icon.yellow{background:var(--yellow)}.stats-icon.navy{background:var(--primary)}
+.stat h6{font-size:.95rem;color:var(--muted);font-weight:600;margin-bottom:.25rem}
+.stat .val{font-weight:700;color:var(--heading);font-size:.92rem;line-height:1.45}
+.stat .src{font-size:.75rem;color:var(--muted);margin-top:.35rem}
+/* brief */
+.brief{display:flex;gap:1.25rem;align-items:flex-start}
+.brief p{margin:0}
+/* table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;color:var(--heading);font-weight:700;padding:.8rem 1rem;border-bottom:2px solid var(--border);font-size:.9rem}
+td{padding:.8rem 1rem;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-weight:700;color:var(--heading);font-variant-numeric:tabular-nums}
+.bar{height:.6rem;border-radius:1rem;background:var(--soft);min-width:70px}
+.bar span{display:block;height:100%;border-radius:1rem}
+/* timeline */
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{display:grid;grid-template-columns:7.5rem 1fr;gap:1rem;padding:.8rem 0;border-bottom:1px dashed var(--border)}
+.timeline li:last-child{border-bottom:0}
+.timeline .t{font-weight:700;color:var(--primary)}
+.timeline li.p-green .t{color:#2fb38a}.timeline li.p-blue .t{color:#2aa8cc}.timeline li.p-red .t{color:#e2605d}
+.timeline .d{font-size:.8rem;color:var(--muted)}
+/* right column */
+.visit{display:flex;align-items:center;gap:1rem;padding:1.5rem}
+.avatar{width:3.5rem;height:3.5rem;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;color:#fff;flex:none}
+.avatar.sm{width:2.6rem;height:2.6rem;font-size:1.1rem}
+.visit h5{font-size:1.15rem;font-weight:700}
+.visit .sub{color:var(--muted);font-size:.9rem}
+.verdict .big{font-size:2rem;font-weight:800;color:var(--heading)}
+.progress{height:.6rem;background:var(--soft);border-radius:1rem;overflow:hidden;margin-bottom:.4rem}
+.progress span{display:block;height:100%;background:var(--primary);transition:width .2s}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;gap:.7rem;align-items:flex-start;padding:.65rem 0;border-bottom:1px solid var(--border);font-size:.92rem}
+.list li:last-child{border-bottom:0}
+.list input{width:1.1rem;height:1.1rem;margin-top:.2rem;accent-color:var(--primary);flex:none}
+.list label{flex:1;cursor:pointer}
+.list .done{text-decoration:line-through;color:var(--muted)}
+.review{display:flex;gap:.9rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--border)}
+.review:last-child{border-bottom:0}
+.rest{display:flex;gap:.9rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--border)}
+.rest:last-child{border-bottom:0}
+.rest .name{font-weight:700;color:var(--heading)}
+.rest .info{font-size:.85rem}
+.rest .sub{font-size:.78rem;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:.375rem;border:1px solid var(--primary);background:transparent;color:var(--primary);font-weight:700;font-family:inherit;font-size:.95rem;cursor:pointer;width:100%}
+.btn:hover,.btn-primary{background:var(--primary);color:#fff}
+form.send{display:flex;flex-direction:column;gap:.7rem}
+form.send input{padding:.6rem .9rem;border:1px solid var(--border);border-radius:.375rem;background:var(--card);color:var(--heading);font-size:1rem;font-family:inherit}
+form.send input:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 .2rem rgba(67,94,190,.15)}
+.toast{font-size:.85rem;display:none}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .65rem;border-radius:.375rem;font-size:.78rem;font-weight:700;color:#fff}
+.bg-danger{background:var(--danger)}.bg-warning{background:var(--warning)}.bg-success{background:var(--success)}.bg-primary{background:var(--primary)}
+.small{font-size:.82rem;color:var(--muted)}
+.warnbox{background:#ffe5e5;color:#b42318;border-radius:.7rem;padding:1rem 1.25rem;margin-bottom:1.5rem;font-weight:600}
+footer{margin-top:2rem;font-size:.8rem;color:var(--muted)}
+.overlay{display:none}
+@media (max-width:1299px){.layout{grid-template-columns:minmax(0,1fr)}.right{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem}}
+@media (max-width:1199px){
+  #sidebar{transform:translateX(-100%)} body.menu-open #sidebar{transform:none}
+  body.menu-open .overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:25}
+  #main{margin-left:0;padding:1.5rem 1rem}
+  .burger{display:block}
+}
+@media (max-width:991px){.right{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:575px){.stats{grid-template-columns:minmax(0,1fr)}.timeline li{grid-template-columns:minmax(0,1fr);gap:.2rem}.page-heading h3{font-size:1.45rem}}
+</style>
+</head>
+<body>
+<div id="sidebar">
+  <div class="sidebar-header">
+    <a class="logo" href="#top"><i class="bi bi-compass-fill"></i>내비게이터</a>
+    <div class="theme-toggle"><i class="bi bi-sun"></i><button class="switch" id="themeSwitch" aria-label="다크 모드 전환"></button><i class="bi bi-moon"></i></div>
+  </div>
+  <div class="sidebar-title">방문 준비</div>
+  <ul class="menu">
+    <li class="sidebar-item active"><a class="sidebar-link" href="#top"><i class="bi bi-grid-fill"></i>현황판</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#brief"><i class="bi bi-megaphone-fill"></i>06:00 브리핑</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#waits"><i class="bi bi-hourglass-split"></i>대기시간</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#schedule"><i class="bi bi-calendar-week-fill"></i>스케줄러</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#reviews"><i class="bi bi-chat-square-text-fill"></i>후기 요약</a></li>
+  </ul>
+  <div class="sidebar-title">내 정보</div>
+  <ul class="menu">
+    <li class="sidebar-item"><a class="sidebar-link" href="#prep"><i class="bi bi-check2-square"></i>준비해야 할 것들</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#food"><i class="bi bi-cup-hot-fill"></i>식당 정보</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#send"><i class="bi bi-phone-fill"></i>휴대폰 전송 (데모)</a></li>
+  </ul>
+  <div class="sidebar-foot">수집 2026-10-06 16:13<br>AI ③ → AI ① → Evaluator</div>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<div id="main">
+  <button class="burger" id="burger" aria-label="메뉴 열기"><i class="bi bi-justify"></i></button>
+  <div class="page-heading" id="top">
+    <h3>방문 현황판</h3>
+    <p>2026년 10월 10일 토요일 · 에버랜드</p>
+  </div>
+
+  
+
+  <div class="layout">
+    <div class="col">
+      <section class="stats"><div class="card stat"><div class="stats-icon red"><i class="bi bi-car-front-fill"></i></div><div><h6>발렛</h6><div class="val">미확보 (10/10 잔여 &#x27;예약 불가&#x27;, 본인 예약 보유 여부 확인 불가). 다음 취소분 확인은 10/9(금) 23:58에 직접 해야 함(알람 미구현)</div><div class="src">출처: Task 2, AI ③</div></div></div><div class="card stat"><div class="stats-icon yellow"><i class="bi bi-p-square-fill"></i></div><div><h6>정문주차장</h6><div class="val">주차 가능성 불확실. 같은 토요일 이력이 없음. 참고로 10/6(화) 16:13 기록에서는 정문주차장 만차, 일반주차장 가능</div><div class="src">출처: AI ③, Task 3</div></div></div><div class="card stat"><div class="stats-icon green"><i class="bi bi-calendar-check-fill"></i></div><div><h6>예약 상태</h6><div class="val">입장 스마트예약 10/6~31 예약가능 / 발렛 미확보</div><div class="src">출처: Task 2</div></div></div><div class="card stat"><div class="stats-icon blue"><i class="bi bi-cloud-sun-fill"></i></div><div><h6>날씨</h6><div class="val">흐림, 최저 12°C / 최고 25°C (에버랜드 공식 날씨, 기상청 API 대체)</div><div class="src">출처: Task 4</div></div></div><div class="card stat"><div class="stats-icon purple"><i class="bi bi-stars"></i></div><div><h6>이벤트·퍼레이드</h6><div class="val">운영 10:00~22:00 (시즌 D). 다크 나이트 사파리 18:00~20:00(무료). 와일드 사바나 익스페디션(9/12~11/30, 무료). 판타스틱 윙스 11:30/15:30. 펭귄 애니멀톡 11:30. 타이거 밸리 애니멀톡 14:30. 알버트 라이브 톡 15:00. 걸어서 사파리 이벤트, 거품멍展, 홀랜드빌리지 비어 페스티벌 진행 중. 퍼레이드 시각은 자료에 없음</div><div class="src">출처: Task 4</div></div></div><div class="card stat"><div class="stats-icon navy"><i class="bi bi-hourglass-split"></i></div><div><h6>지난 주말 대기열</h6><div class="val">같은 요일(토) 이력 없음. 참고로 10/6(화) 16:13 기록은 사파리월드 50분, 판다 세컨하우스 40분, 와일드 사바나 익스페디션 10분</div><div class="src">출처: Task 3</div></div></div></section>
+
+      <section class="card" id="brief">
+        <div class="card-header"><h4>06:00 브리핑</h4></div>
+        <div class="card-body brief">
+          <div class="stats-icon navy"><i class="bi bi-megaphone-fill"></i></div>
+          <p>오늘(10/10 토) 권장 출발시간은 <b>산출 불가</b>입니다. 카카오모빌리티 API 키가 없어 율목초등학교에서 정문주차장까지 걸리는 시간을 계산하지 못했습니다(Task 5). 그러니 출발 전에 지도 앱으로 소요시간을 직접 확인하세요. 발렛은 확보하지 못했고, 정문주차장에 댈 수 있을지는 불확실합니다. 주말에는 최소 8시에 도착해야 한다는 후기가 있어서(작성 연도 불명확), AI ③은 도착 목표를 09:00에서 <b>08:00 전후로 앞당길 것을 &#x27;제안&#x27;</b>합니다. 만차이면 일반주차장을 이용합니다. 오늘의 핵심 동선은 다음과 같습니다. 10:00 개장 직후 주토피아로 가서 사파리월드를 먼저 타고 와일드 사바나 익스페디션(로스트밸리 도보 탐험, 기린 관람)으로 이어갑니다. 저녁에는 18:00~20:00 다크 나이트 사파리를 봅니다.</p>
+        </div>
+      </section>
+
+      <section class="card" id="waits">
+        <div class="card-header"><h4>어트랙션 대기시간 상위 8</h4><span class="meta">2026-10-06 16:13:26 (화요일, 평일) · 분</span></div>
+        <div class="card-body table-wrap">
+          <table>
+            <thead><tr><th>어트랙션</th><th>존</th><th style="text-align:right">대기</th><th>비교</th></tr></thead>
+            <tbody><tr><td>사파리월드 : 더 와일드</td><td>주토피아</td><td class="num">50</td><td><div class="bar"><span style="width:100%;background:var(--red)"></span></div></td></tr><tr><td>판다 세컨하우스</td><td>주토피아</td><td class="num">40</td><td><div class="bar"><span style="width:80%;background:var(--red)"></span></div></td></tr><tr><td>썬더폴스</td><td>매직랜드</td><td class="num">40</td><td><div class="bar"><span style="width:80%;background:var(--red)"></span></div></td></tr><tr><td>모니모RUSH</td><td>유러피언 어드벤처</td><td class="num">30</td><td><div class="bar"><span style="width:60%;background:var(--yellow)"></span></div></td></tr><tr><td>롤링 엑스 트레인</td><td>아메리칸 어드벤처</td><td class="num">30</td><td><div class="bar"><span style="width:60%;background:var(--yellow)"></span></div></td></tr><tr><td>피터팬</td><td>매직랜드</td><td class="num">30</td><td><div class="bar"><span style="width:60%;background:var(--yellow)"></span></div></td></tr><tr><td>아마존 익스프레스</td><td>주토피아</td><td class="num">20</td><td><div class="bar"><span style="width:40%;background:var(--yellow)"></span></div></td></tr><tr><td>판다월드</td><td>주토피아</td><td class="num">20</td><td><div class="bar"><span style="width:40%;background:var(--yellow)"></span></div></td></tr></tbody>
+          </table>
+          <p class="small">방문일과 같은 토요일 이력이 아직 없어 화요일 기록 1건을 참고용으로 보여줘요.</p>
+        </div>
+      </section>
+
+      <section class="card" id="schedule">
+        <div class="card-header"><h4>스케줄러 · 사파리·와일드 사바나 중심 동선</h4></div>
+        <div class="card-body"><ul class="timeline"><li class=""><div class="t">10/9 23:58</div><div><div>발렛 취소분 직접 확인</div><div class="d">근거: Task 2, AI ③</div></div></li><li class=""><div class="t">06:00</div><div><div>브리핑 확인, 지도 앱으로 소요시간 확인 후 출발 시각 결정 (권장 출발시간 산출 불가)</div><div class="d">근거: Task 5</div></div></li><li class=""><div class="t">08:00 전후 (제안) / 09:00 (목표)</div><div><div>정문주차장 도착. 만차이면 일반주차장 이용</div><div class="d">근거: AI ③ 제안, Task 5 목표 도착</div></div></li><li class=""><div class="t">10:00</div><div><div>파크 오픈. APP에서 We Pick 쿠폰 다운로드</div><div class="d">근거: Task 4 운영시간·정기권</div></div></li><li class="p-green"><div class="t">10:00~</div><div><div>사파리월드 : 더 와일드 먼저 탑승 (10/6 화 기록에서 대기 50분으로 주토피아 최장. 같은 토요일 이력 없음)</div><div class="d">근거: Task 3</div></div></li><li class="p-green"><div class="t">사파리 직후</div><div><div>와일드 사바나 익스페디션(로스트밸리 도보, 기린·코끼리·사자 관람). 현장 줄서기, 무료, 탐험 차량 미운영</div><div class="d">근거: Task 4, Task 3</div></div></li><li class="p-blue"><div class="t">11:30</div><div><div>판타스틱 윙스 또는 펭귄 애니멀톡 관람 (택1)</div><div class="d">근거: Task 4 공연</div></div></li><li class="p-red"><div class="t">공연 종료 후 (14:30 타이거 밸리 애니멀톡 전)</div><div><div>점심: 존 이동 없이 주토피아의 카페 정글캠프(10:30~19:30)를 1순위로. 유러피언 어드벤처의 알파인 레스토랑(11:30~19:30)는 존을 옮겨야 하므로 대안 (식당 정보 참고). 공연 소요시간은 자료에 없음</div><div class="d">근거: Task 4 공연·식당</div></div></li><li class=""><div class="t">오후</div><div><div>판다월드·판다 세컨하우스(10/6 화 기록 대기 20분·40분, 운영 ~17:30)</div><div class="d">근거: Task 3</div></div></li><li class="p-blue"><div class="t">14:30 / 15:00</div><div><div>타이거 밸리 애니멀톡 14:30, 알버트 라이브 톡 15:00</div><div class="d">근거: Task 4 공연</div></div></li><li class="p-green"><div class="t">~17:00</div><div><div>사파리월드·와일드 사바나 익스페디션 운영 종료 전에 놓친 것 다시 이용 (운영시간은 10/6 화 기록 기준)</div><div class="d">근거: Task 3</div></div></li><li class="p-green"><div class="t">18:00~20:00</div><div><div>다크 나이트 사파리 (사파리월드 야간 개장, 무료)</div><div class="d">근거: Task 4 이벤트</div></div></li><li class="p-red"><div class="t">저녁</div><div><div>저녁 식사: 파크 안 홀랜드 빌리지(~21:50) 또는 파크 밖 희락보리</div><div class="d">근거: Task 4 식당, 자주 가는 식당</div></div></li><li class=""><div class="t">22:00</div><div><div>파크 운영 종료</div><div class="d">근거: Task 4</div></div></li></ul></div>
+      </section>
+
+      <section class="card" id="reviews">
+        <div class="card-header"><h4>이용자 후기 요약</h4><span class="meta">웹 검색 · 보조 근거</span></div>
+        <div class="card-body"><div class="review"><div class="avatar sm" style="background:var(--yellow)"><i class="bi bi-p-circle-fill"></i></div><div>주차: 주말 정문 주차는 최소 8시에 도착해야 한다는 방문객 후기가 있음. 작성 연도가 불명확해 보조 근거로만 씀 (Task 4 웹 검색 후기)</div></div><div class="review"><div class="avatar sm" style="background:var(--red)"><i class="bi bi-people-fill"></i></div><div>혼잡도(와일드 사바나 익스페디션): 개장 10일 만에 누적 관람객 10만 명을 넘었고 &#x27;와사익&#x27;으로 불리며 화제. 현장 줄서기로 무료 체험 가능 (아시아경제·파이낸셜뉴스 2026-09 기사, Task 4)</div></div><div class="review"><div class="avatar sm" style="background:var(--red)"><i class="bi bi-people-fill"></i></div><div>혼잡도(사파리·주차 만차 시각): 2026년 10월 주말의 구체적인 정문주차장 만차 시각과 사파리 대기시간 후기는 찾지 못함 (Task 4)</div></div><div class="review"><div class="avatar sm" style="background:var(--purple)"><i class="bi bi-balloon-fill"></i></div><div>퍼레이드: 퍼레이드 관련 후기는 수집 자료에 없음 (Task 4)</div></div></div>
+      </section>
+    </div>
+
+    <div class="col right">
+      <section class="card">
+        <div class="visit">
+          <div class="avatar" style="background:var(--primary)"><i class="bi bi-ticket-perforated-fill"></i></div>
+          <div><h5>D-4 · 10/10 (토)</h5><div class="sub">정기권 방문 · 꿈빛 솜사탕</div></div>
+        </div>
+      </section>
+
+      <section class="card verdict">
+        <div class="card-header"><h4>브리핑 검토</h4></div>
+        <div class="card-body">
+          <div class="big">PASS</div>
+          <p class="small" style="margin:.2rem 0 .8rem">2회차에서 기준 1~6 검토 (최대 3회)</p>
+          <span class="badge bg-danger"><i class="bi bi-car-front-fill"></i>발렛 미확보</span>
+          <span class="badge bg-warning"><i class="bi bi-clock-fill"></i>출발시간 산출 불가</span>
+        </div>
+      </section>
+
+      <section class="card" id="prep">
+        <div class="card-header"><h4>준비해야 할 것들</h4><span class="meta" id="prog-text">0 / 8</span></div>
+        <div class="card-body">
+          <div class="progress"><span id="prog" style="width:0"></span></div>
+          <ul class="list" id="checklist"><li><input type="checkbox" id="c0"><label for="c0">발렛 취소분 직접 확인 (10/9 금 23:58)</label></li><li><input type="checkbox" id="c1"><label for="c1">지도 앱으로 율목초등학교 → 정문주차장 소요시간을 확인하고 출발 시각 정하기. 도착 목표는 08:00 전후 제안 (10/10 출발 전)</label></li><li><input type="checkbox" id="c2"><label for="c2">입장 스마트예약 상태 확인 (방문 전)</label></li><li><input type="checkbox" id="c3"><label for="c3">카카오T 앱 전용 정문주차장 5,000원 할인 쿠폰(꿈빛 등급, 반기별 1매) 챙기기 (주차 정산 전)</label></li><li><input type="checkbox" id="c4"><label for="c4">정기권 We Pick 쿠폰 1종 다운로드. 직영식당 10%, 직영상품 10% 등에서 고르며 입장 당일 APP에서만 받을 수 있고 조기 소진될 수 있음 (10/10 입장 직후)</label></li><li><input type="checkbox" id="c5"><label for="c5">정기권 전용 로스트밸리샵 굿즈 할인 쿠폰 확인 (10/10 방문 중)</label></li><li><input type="checkbox" id="c6"><label for="c6">일교차(12~25°C)와 저녁 다크 나이트 사파리에 대비해 겉옷 챙기기 (출발 전)</label></li><li><input type="checkbox" id="c7"><label for="c7">와일드 사바나 익스페디션은 우산·양산 사용이 제한되고 유아차는 보관소에 맡기는 것이 권장됨. 흐린 날씨에 맞춰 대비 (출발 전)</label></li></ul>
+        </div>
+      </section>
+
+      <section class="card" id="food">
+        <div class="card-header"><h4>식당 정보</h4></div>
+        <div class="card-body"><div class="rest"><div class="avatar sm" style="background:var(--purple)"><i class="bi bi-cup-hot-fill"></i></div><div><div class="name">카페 정글캠프</div><div class="info">추천: 스파게티·피자·치킨·커피</div><div class="sub">주토피아 (사파리·와일드 사바나 근처) · 10:30~19:30 OPEN, 점심 1순위</div></div></div><div class="rest"><div class="avatar sm" style="background:var(--purple)"><i class="bi bi-cup-hot-fill"></i></div><div><div class="name">카페 아모제</div><div class="info">추천: 핫도그·치킨강정·커피·에이드</div><div class="sub">주토피아 · 10:00~18:00 OPEN</div></div></div><div class="rest"><div class="avatar sm" style="background:var(--purple)"><i class="bi bi-cup-hot-fill"></i></div><div><div class="name">아마존 스낵</div><div class="info">추천: 츄러스·핫도그·후라이드닭꼬치·훈제소시지</div><div class="sub">주토피아 · 10:00~20:00 OPEN, 간식용</div></div></div><div class="rest"><div class="avatar sm" style="background:var(--purple)"><i class="bi bi-cup-hot-fill"></i></div><div><div class="name">판다월드 카페</div><div class="info">추천: 커피·에이드·스무디·초코츄러스</div><div class="sub">주토피아 (판다월드 근처) · 10:00~17:10 OPEN</div></div></div><div class="rest"><div class="avatar sm" style="background:var(--purple)"><i class="bi bi-cup-hot-fill"></i></div><div><div class="name">알파인 레스토랑</div><div class="info">추천: 김치찌개·돈가스·바삭게살튀김·단체돈가스</div><div class="sub">유러피언 어드벤처 · 11:30~19:30 OPEN, 알파인 계열 한식</div></div></div><div class="rest"><div class="avatar sm" style="background:var(--purple)"><i class="bi bi-cup-hot-fill"></i></div><div><div class="name">알프스 쿠체</div><div class="info">추천: 양식·바비큐·치킨·떡볶이</div><div class="sub">유러피언 어드벤처 · 11:30~19:30 OPEN</div></div></div><div class="rest"><div class="avatar sm" style="background:var(--purple)"><i class="bi bi-cup-hot-fill"></i></div><div><div class="name">홀랜드 빌리지</div><div class="info">추천: 생맥주·바비큐·볶음밥·피자</div><div class="sub">유러피언 어드벤처 · 12:00~21:50 OPEN, 홀랜드빌리지 비어 페스티벌(~10/31) 진행 중, 저녁 후보</div></div></div><div class="rest"><div class="avatar sm" style="background:var(--green)"><i class="bi bi-geo-alt-fill"></i></div><div><div class="name">희락보리 (파크 밖)</div><div class="info">추천: 희락양념게장보리밥 17,000원, 희락제육보리밥 14,000원</div><div class="sub">포곡읍 포곡로234번길 10 (에버랜드역에서 둔전리 방향 차량 약 5분) · 평점 4.77(리뷰 2,082), 주차·예약·유아의자 가능. 영업시간은 네이버에 미등록. 혼잡 시간대는 <b>더미</b></div></div></div><p class="small">※ 직영식당이면 We Pick 직영식당 10% 쿠폰을 쓸 수 있습니다. 다만 어느 식당이 직영인지는 입력 자료에 없으므로 현장에서 확인해야 합니다.</p></div>
+      </section>
+
+      <section class="card" id="send">
+        <div class="card-header"><h4>휴대폰으로 보내기</h4><span class="badge bg-warning" style="margin-left:auto">데모</span></div>
+        <div class="card-body">
+          <form class="send" id="sendForm">
+            <input type="tel" id="phone" placeholder="010-0000-0000" inputmode="numeric" autocomplete="off">
+            <button class="btn" type="submit"><i class="bi bi-send-fill"></i>페이지 전송</button>
+          </form>
+          <p class="toast" id="toast"></p>
+          <p class="small">실제 문자 발송 서비스와 연결되어 있지 않아요.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>출처: 에버랜드 공식 웹 공개 조회·스마트예약(로그인), 네이버 플레이스, 웹 검색 · 기상청·카카오 API 키 미발급으로 일부 대체/산출 불가 · 레이아웃: Mazer 스타일 참고</footer>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  try{ var saved=localStorage.getItem('nav-theme'); if(saved) root.setAttribute('data-theme',saved); }catch(e){}
+  document.getElementById('themeSwitch').addEventListener('click',function(){
+    var dark=root.getAttribute('data-theme')==='dark' || (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next=dark?'light':'dark'; root.setAttribute('data-theme',next);
+    try{ localStorage.setItem('nav-theme',next); }catch(e){}
+  });
+  var boxes=document.querySelectorAll('#checklist input');
+  function update(){
+    var done=0;
+    boxes.forEach(function(b){ b.nextElementSibling.classList.toggle('done',b.checked); if(b.checked)done++; });
+    document.getElementById('prog').style.width=(boxes.length?done/boxes.length*100:0)+'%';
+    document.getElementById('prog-text').textContent=done+' / '+boxes.length;
+  }
+  boxes.forEach(function(b){ b.addEventListener('change',update); });
+  update();
+  document.getElementById('sendForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=document.getElementById('phone').value.replace(/[^0-9]/g,'');
+    var t=document.getElementById('toast');
+    t.style.display='block';
+    if(!/^01[0-9]{8,9}$/.test(v)){ t.style.color='var(--danger)'; t.textContent='휴대폰 번호 형식을 확인해 주세요.'; return; }
+    t.style.color='var(--success)';
+    t.textContent='(데모) '+v.replace(/(\d{3})(\d{3,4})(\d{4})/,'$1-$2-$3')+' 번호로 전송을 요청했어요. 실제로 발송되지는 않아요.';
+  });
+  function closeMenu(){document.body.classList.remove('menu-open');}
+  document.getElementById('burger').addEventListener('click',function(){document.body.classList.add('menu-open');});
+  document.getElementById('overlay').addEventListener('click',closeMenu);
+  var items=document.querySelectorAll('.sidebar-item');
+  items.forEach(function(li){ li.querySelector('a').addEventListener('click',function(){ items.forEach(function(x){x.classList.remove('active')}); li.classList.add('active'); closeMenu(); }); });
+})();
+</script>
+</body>
+</html>

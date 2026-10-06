@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에버랜드 Agent 팀</title>
+<style>
+:root{
+  --bg:#f5f7fb;--card:#fff;--text:#1d273b;--muted:#667382;--line:#9aa5b4;--border:#e3e7ee;--soft:#eef1f5;
+  --code:#206bc4;--code-bg:#e8f0fa;--ai:#ae3ec9;--ai-bg:#f7ecfa;--human:#f08c00;--human-bg:#fff4e0;
+  --router:#2f9e44;--router-bg:#e9f7ec;--eval:#d6336c;--eval-bg:#fdecf2;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141b26;--card:#1c2533;--text:#e7ecf3;--muted:#9aa5b4;--line:#5c6b80;--border:#2d394b;--soft:#222c3b;
+  --code-bg:#1b2e48;--ai-bg:#33213d;--human-bg:#3a2d17;--router-bg:#1b3324;--eval-bg:#3b1f2b;}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:14px;line-height:1.55}
+header{background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.bar{max-width:1120px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.brand{width:34px;height:34px;border-radius:9px;background:var(--code);color:#fff;display:grid;place-items:center;font-weight:800}
+.bar h1{font-size:17px;margin:0}
+.bar .sub{font-size:12px;color:var(--muted)}
+nav{max-width:1120px;margin:0 auto;padding:0 16px;display:flex;gap:2px;overflow-x:auto}
+nav a{padding:9px 12px;color:var(--muted);text-decoration:none;white-space:nowrap;font-weight:600;font-size:13px;border-bottom:2px solid transparent}
+nav a:hover{color:var(--code);border-color:var(--code)}
+main{max-width:1120px;margin:0 auto;padding:22px 16px 60px}
+section{margin-bottom:34px;scroll-margin-top:110px}
+.sec-h{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+.num{width:26px;height:26px;border-radius:50%;background:var(--code);color:#fff;display:inline-grid;place-items:center;font-size:13px;font-weight:800;flex:none;transform:translateY(3px)}
+.sec-h h2{margin:0;font-size:19px}
+.sec-h p{margin:0;color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;min-width:0}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kv .k{font-size:12px;color:var(--muted);font-weight:600}
+.kv .v{font-size:15px;font-weight:700;margin-top:2px}
+.hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+.hero .goal{font-size:15.5px;font-weight:600;margin:6px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--card)}
+.dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:700;background:var(--soft);white-space:nowrap}
+.go{display:none;font-size:12px;font-weight:700;color:var(--muted);margin:4px 0}
+tr:last-child td{border-bottom:0}
+td b{font-weight:700}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;color:#fff;white-space:nowrap}
+.t-code{background:var(--code)}.t-ai{background:var(--ai)}.t-human{background:var(--human)}.t-eval{background:var(--eval)}.t-router{background:var(--router)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:var(--soft);padding:1px 5px;border-radius:4px}
+.muted{color:var(--muted)}
+.small{font-size:12px;color:var(--muted)}
+/* workflow diagram */
+.flow{display:flex;flex-direction:column;align-items:center}
+.node{position:relative;width:min(540px,100%);border-radius:10px;padding:9px 13px;border:1.5px solid;background:var(--card)}
+.node .tag{margin-right:6px;vertical-align:1px}
+.node .desc{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.code{border-color:var(--code);background:var(--code-bg)}
+.ai{border-color:var(--ai);background:var(--ai-bg)}
+.human{border-color:var(--human);background:var(--human-bg)}
+.eval{border-color:var(--eval);background:var(--eval-bg)}
+.inputs-node{border-color:var(--line);background:var(--soft)}
+.arrow{width:2px;height:20px;background:var(--line);position:relative;margin:2px 0 6px}
+.arrow:after{content:"";position:absolute;left:-5px;bottom:-6px;border:6px solid transparent;border-top-color:var(--line);border-bottom:0}
+.lbl{font-size:11.5px;font-weight:700;color:var(--muted);background:var(--bg);padding:0 6px}
+.router{display:flex;flex-direction:column;align-items:center;width:100%}
+.diamond{background:var(--router-bg);border:1.5px solid var(--router);padding:9px 22px;font-weight:700;text-align:center;clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,12px 100%,0 50%)}
+.diamond small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:100%;position:relative;margin-top:6px}
+.split:before{content:"";position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--line)}
+.branch{display:flex;flex-direction:column;align-items:center}
+.stem{width:2px;height:14px;background:var(--line)}
+.merge{width:100%;height:16px;position:relative}
+.merge:before{content:"";position:absolute;left:25%;right:25%;bottom:0;height:2px;background:var(--line)}
+.ge{border:1.5px dashed var(--eval);border-radius:12px;padding:12px 10px;width:100%;display:flex;flex-direction:column;align-items:center}
+.ge-title{font-size:11.5px;font-weight:700;margin-bottom:8px;padding:2px 8px;border-radius:4px;background:var(--eval);color:#fff}
+.loop{display:flex;align-items:stretch;gap:8px;width:100%}
+.loop .col{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+.loopbar{width:56px;display:flex;align-items:center;justify-content:center;border:2px solid var(--eval);border-left:0;border-radius:0 10px 10px 0;margin:18px 0 70px;font-size:11px;font-weight:700;color:var(--eval);text-align:center;padding:4px;position:relative}
+.loopbar:before{content:"";position:absolute;left:-7px;top:-7px;border:6px solid transparent;border-right-color:var(--eval);border-left:0}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.res>div{display:flex;flex-direction:column;align-items:center}
+.wf-side{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.wf-info{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.node{width:min(620px,100%)}
+ol.crit{margin:6px 0 0;padding-left:20px}
+ol.crit li{margin:3px 0}
+/* sample */
+.sample-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+.btn{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit}
+.btn.on{background:var(--code);border-color:var(--code);color:#fff}
+.frame-box{background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;justify-content:center;overflow-x:auto}
+iframe{width:100%;max-width:100%;height:860px;border:0;border-radius:8px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08);transition:width .2s}
+footer{max-width:1120px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font-size:12px}
+@media (max-width:900px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.hero,.wf-side,.g2,.wf-info{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.split{grid-template-columns:minmax(0,1fr);gap:10px}.split:before,.merge:before{display:none}.split>.branch{border:1.5px dashed var(--border);border-radius:12px;padding:8px}.split>.branch>.stem{display:none}.arrow.skip{display:none}.go{display:block}.res{grid-template-columns:minmax(0,1fr)}.loopbar{width:44px}iframe{height:640px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">E</div>
+    <div><h1>에버랜드 방문 내비게이터 · Agent 팀</h1><div class="sub">업무설계서 · CLAUDE.md · Sub Agent 지시서 · workflow.md 기준 요약</div></div>
+  </div>
+  <nav>
+    <a href="#job">1. 업무</a><a href="#inputs">2. 입력 자료</a><a href="#agents">3. Sub Agent</a><a href="#workflow">4. Workflow</a><a href="#sample">5. 결과물 샘플</a>
+  </nav>
+</header>
+
+<main>
+  <!-- 1 -->
+  <section id="job">
+    <div class="sec-h"><span class="num">1</span><h2>Agent로 만든 업무</h2></div>
+    <div class="hero">
+      <div class="card">
+        <div class="kv"><div class="k">업무명</div><div class="v">에버랜드 방문 준비 정보 취합</div></div>
+        <p class="small" style="margin:4px 0 0">발렛파킹 유무 · 예약 가능 상태 · 날씨 · 이벤트 · 지난 주말 대기열 기반 동선 · 주변 식당 정보</p>
+        <p class="goal">정기권 방문(월 1~2회) 준비 정보 확인을 자동화하고, 출발 전 브리핑부터 파크 안 동선까지 하나의 대시보드로 내비게이터처럼 쓴다.</p>
+      </div>
+      <div class="grid g2">
+        <div class="card kv"><div class="k">Sub Agent</div><div class="v">4개</div><div class="small">AI ① · ② · ③ · Evaluator</div></div>
+        <div class="card kv"><div class="k">Task</div><div class="v">7단계</div><div class="small">사람 1 · 코드 5 · AI 1 (업무설계서 기준)<br>Task 6은 AI ①②③·Evaluator로 세분</div></div>
+        <div class="card kv"><div class="k">적용 패턴</div><div class="v">Router 2 · Gen/Eval 1</div><div class="small">Parallel 없음</div></div>
+        <div class="card kv"><div class="k">결과물</div><div class="v">단일 HTML 대시보드</div><div class="small">Tabler 스타일</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="inputs">
+    <div class="sec-h"><span class="num">2</span><h2>사용한 입력 자료</h2><p>업무설계서 2장</p></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>자료 이름</th><th>형식</th><th>주요 내용</th><th>쓰는 Task</th></tr></thead>
+        <tbody>
+          <tr><td><b>에버랜드 공식 홈페이지·앱</b></td><td>웹사이트·앱</td><td>운영 정보, 퍼레이드·공연 시간대, 이벤트</td><td>4</td></tr>
+          <tr><td><b>발렛파킹 가능 여부</b></td><td>웹사이트·앱 (공식)</td><td>방문일의 발렛파킹 운영 여부</td><td>2</td></tr>
+          <tr><td><b>정문주차장 주차 가능 여부</b></td><td>웹사이트·앱 (공식), 후기·커뮤니티</td><td>방문일과 같은 요일(공휴일·평일 구분) 기준 정문주차장 주차 가능 여부</td><td>3 (후기는 4)</td></tr>
+          <tr><td><b>현재 예약 가능 상태</b></td><td>웹사이트·앱 (공식, 로그인 필요)</td><td>방문 희망일의 정기권 예약 가능 여부</td><td>2</td></tr>
+          <tr><td><b>지난 주말 대기열 정보</b></td><td>공식 앱 대기시간, 후기·커뮤니티</td><td>어트랙션별 대기 시간 (동선을 짜는 데 사용)</td><td>3</td></tr>
+          <tr><td><b>날씨 정보</b></td><td>네이버 날씨</td><td>방문일 용인 에버랜드 날씨</td><td>4</td></tr>
+          <tr><td><b>에버랜드 방문 후기</b></td><td>웹 검색 (블로그·커뮤니티)</td><td>퍼레이드, 혼잡도 등 다른 이용자들의 후기</td><td>4</td></tr>
+          <tr><td><b>자주 가는 식당 목록</b></td><td>네이버 지도 링크</td><td>평소 자주 가는 에버랜드 주변 식당</td><td>AI ①</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="agents">
+    <div class="sec-h"><span class="num">3</span><h2>Sub Agent별 역할</h2><p><code>.claude/agents/</code> · 하나의 Agent = 하나의 역할</p></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Sub Agent</th><th>호출 조건</th><th>역할</th><th>입력</th><th>결과물</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag t-ai">AI ③</span><br><code>parking-strategy</code></td><td>Router B = 발렛 미확보</td><td>같은 요일 정문주차장 만차 이력으로 주차 가능성 판단, 출발 시각 조정·취소분 대응·만차 대안 정리</td><td>Task 2~5 결과</td><td>주차 가능성(가능 예상/불확실/어려움) + 근거 표 + 전략</td></tr>
+          <tr><td><span class="tag t-ai">AI ① Gen</span><br><code>briefing-writer</code></td><td>Router A = 출발 전</td><td>사파리·로스트밸리 중심 동선, 식당·추천 메뉴, 06:00 브리핑 작성. FAIL 시 지적 부분만 수정</td><td>Task 2~5, AI ③(미확보 시), 자주 가는 식당, Evaluator 피드백</td><td>06:00 브리핑 · 현황판 · 준비물 · 스케줄러 · 후기 요약 · 식당 정보</td></tr>
+          <tr><td><span class="tag t-eval">Evaluator</span><br><code>briefing-evaluator</code></td><td>AI ① 작성 직후</td><td>기준 1~6으로 PASS/FAIL만 판정. 직접 수정하지 않음</td><td>AI ① 브리핑 + 원본 자료</td><td>기준별 충족 표 + 수정 요청</td></tr>
+          <tr><td><span class="tag t-ai">AI ②</span><br><code>park-navigator</code></td><td>Router A = 파크 안</td><td>현재 대기시간·남은 일정으로 다음 행선지 재추천 (Gen/Eval 미적용)</td><td>현재 시각, 최신 대기시간, 방문일 정보, PASS된 계획</td><td>다음 행선지 최대 2곳 + 계획 대비 변경점</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small" style="margin:8px 2px 0">공통 규칙: 입력 자료에 없는 숫자·시각·내용을 만들지 않고 근거·출처를 붙임 · 더미 데이터(파크 밖 식당 혼잡 시간대)는 '더미' 표시 · 로그인·예약·결제는 사람이 하며 로그인은 전용 Edge 프로필(<code>.edge-profile</code>)만 사용 · 한국어 작성</p>
+  </section>
+
+  <!-- 4 -->
+  <section id="workflow">
+    <div class="sec-h"><span class="num">4</span><h2>Agent들이 일하는 Workflow</h2><p>workflow.md 기준</p></div>
+    <div class="chips" style="margin:0 0 12px">
+      <span class="chip"><span class="dot" style="background:var(--human)"></span>사람</span>
+      <span class="chip"><span class="dot" style="background:var(--code)"></span>코드</span>
+      <span class="chip"><span class="dot" style="background:var(--ai)"></span>AI</span>
+      <span class="chip"><span class="dot" style="background:var(--router)"></span>Router</span>
+      <span class="chip"><span class="dot" style="background:var(--eval)"></span>Gen / Eval</span>
+      <span class="chip">Parallel: 없음</span>
+    </div>
+    <div class="wf-side">
+      <div class="card">
+        <div class="flow">
+          <div class="node inputs-node"><b>입력 자료 8종</b><span class="desc">공식 웹·스마트예약 · 주차/대기 이력 · 날씨 · 후기 · 식당</span></div>
+          <div class="arrow"></div>
+          <div class="node human"><span class="tag t-human">사람</span><b>1.</b> 에버랜드 로그인 · 발렛/입장 예약 확정</div>
+          <div class="arrow"></div>
+          <div class="node code"><span class="tag t-code">코드</span><b>2.</b> 발렛 잔여·입장 예약 조회<span class="desc">미확보 시 취소분 확인 · 전날 23:58 알람 · 세션 만료 알림</span></div>
+          <div class="arrow"></div>
+          <div class="node code"><span class="tag t-code">코드</span><b>3.</b> 주차·발렛 만차 + 대기시간 주기 기록</div>
+          <div class="arrow"></div>
+          <div class="node code"><span class="tag t-code">코드</span><b>4.</b> 방문일 정보 수집</div>
+          <div class="arrow"></div>
+          <div class="node code"><span class="tag t-code">코드</span><b>5.</b> 06:00 권장 출발시간 계산<span class="desc">율목초등학교 → 정문주차장 09:00 도착 역산</span></div>
+          <div class="arrow"></div>
+          <div class="router">
+            <div class="diamond">Router A · 실행 시점<small>유형</small></div>
+            <div class="arrow" style="height:12px"></div>
+            <div class="split">
+              <div class="branch">
+                <div class="stem"></div><span class="lbl">출발 전</span><div class="arrow" style="height:10px"></div>
+                <div class="diamond">Router B · 발렛 확보?<small>상태 · Task 2 결과</small></div>
+                <div class="arrow" style="height:12px"></div>
+                <div class="split">
+                  <div class="branch"><div class="stem"></div><span class="lbl">확보</span><div class="arrow skip" style="height:60px"></div><span class="go">→ 바로 AI ①</span></div>
+                  <div class="branch"><div class="stem"></div><span class="lbl">미확보</span><div class="arrow" style="height:10px"></div>
+                    <div class="node ai" style="width:100%"><span class="tag t-ai">AI ③</span>주차 전략</div>
+                    <div class="arrow" style="height:12px"></div>
+                  </div>
+                </div>
+                <div class="merge"></div>
+                <div class="arrow" style="height:12px"></div>
+                <div class="ge">
+                  <span class="ge-title">Gen / Eval · 최대 3회</span>
+                  <div class="loop">
+                    <div class="col">
+                      <div class="node ai" style="width:100%"><span class="tag t-ai">AI ① Gen</span>동선·식당·06:00 브리핑</div>
+                      <div class="arrow"></div>
+                      <div class="node eval" style="width:100%"><span class="tag t-eval">Evaluator</span>기준 1~6 검토</div>
+                      <div class="arrow" style="height:12px"></div>
+                      <div class="res">
+                        <div><span class="lbl">PASS</span><div class="arrow skip" style="height:92px"></div><span class="go">→ 7. 대시보드</span></div>
+                        <div><span class="lbl">FAIL · 3회 도달</span><div class="arrow" style="height:10px"></div>
+                          <div class="node human" style="width:100%"><span class="tag t-human">사람</span>검토 미통과 확인</div>
+                          <div class="arrow" style="height:12px"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="loopbar">FAIL<br>3회 미만<br>↺</div>
+                  </div>
+                </div>
+              </div>
+              <div class="branch">
+                <div class="stem"></div><span class="lbl">파크 안</span><div class="arrow" style="height:10px"></div>
+                <div class="node ai" style="width:100%"><span class="tag t-ai">AI ②</span>실시간 재추천<span class="desc">Gen/Eval 미적용</span></div><span class="go">→ 7. 대시보드</span>
+              </div>
+            </div>
+            <div class="merge" style="height:22px"></div>
+            <div class="arrow"></div>
+          </div>
+          <div class="node code"><span class="tag t-code">코드</span><b>7.</b> 내비게이터 대시보드 생성·갱신<span class="desc">같은 링크로 수시 갱신 · 휴대폰 전송(데모)</span></div>
+          <div class="arrow"></div>
+          <div class="node inputs-node"><b>결과물</b> · 단일 HTML 대시보드 <span class="muted">(아래 5번 샘플)</span></div>
+        </div>
+      </div>
+      <div class="wf-info">
+        <div class="table-wrap">
+          <table style="min-width:0">
+            <thead><tr><th>단계</th><th>Task</th><th>주체</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>로그인 · 발렛/입장 예약 확정</td><td><span class="tag t-human">사람</span></td></tr>
+              <tr><td>2</td><td>발렛·입장 상태 조회, 취소분 확인, 23:58 알람</td><td><span class="tag t-code">코드</span></td></tr>
+              <tr><td>3</td><td>주차·대기시간 요일별 이력 축적</td><td><span class="tag t-code">코드</span></td></tr>
+              <tr><td>4</td><td>방문일 정보 수집</td><td><span class="tag t-code">코드</span></td></tr>
+              <tr><td>5</td><td>권장 출발시간 계산</td><td><span class="tag t-code">코드</span></td></tr>
+              <tr><td>6</td><td>동선·식당·브리핑 작성</td><td><span class="tag t-ai">AI</span></td></tr>
+              <tr><td>7</td><td>대시보드 생성·갱신</td><td><span class="tag t-code">코드</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <b>Router</b>
+          <ul style="margin:6px 0 0;padding-left:18px">
+            <li><b>A · 실행 시점</b>: 출발 전 → Router B / 파크 안 → AI ②</li>
+            <li><b>B · 발렛 확보</b>: 확보 → AI ① / 미확보 → AI ③ → AI ①</li>
+          </ul>
+        </div>
+        <div class="card">
+          <b>Gen / Eval 기준</b> <span class="small">모두 충족 = PASS · FAIL 시 AI ①로 복귀 · 최대 3회 · 초과 시 사람 확인</span>
+          <ol class="crit">
+            <li>결과물 구성 5개 포함 (현황판·준비물·스케줄러·후기·식당)</li>
+            <li>현황판 값 = 수집 값</li>
+            <li>운영·공연 일정과 충돌 없음</li>
+            <li>사파리·로스트밸리 중심 동선</li>
+            <li>출발시간 = Task 5 계산값</li>
+            <li>근거 없는 내용 없음 · 더미 표시</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="sample">
+    <div class="sec-h"><span class="num">5</span><h2>결과물 샘플</h2><p>reference/example.html 전체를 이 파일 안에 포함 (가상 데이터)</p></div>
+    <div class="sample-bar">
+      <button class="btn on" data-w="100%">데스크톱</button>
+      <button class="btn" data-w="390px">모바일</button>
+      <button class="btn" id="openNew">새 창으로 열기</button>
+      <span class="small">구성: 현황판 · 준비해야 할 것들 · 스케줄러 · 이용자 후기 요약 · 식당 정보 · 휴대폰 전송(데모)</span>
+    </div>
+    <div class="frame-box"><iframe id="sampleFrame" title="결과물 샘플" srcdoc="&lt;!doctype html&gt;
+&lt;html lang=&quot;ko&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+&lt;title&gt;방문 준비 대시보드&lt;/title&gt;
+&lt;style&gt;
+:root{
+  --bg:#f6f8fb;--card:#ffffff;--text:#1d273b;--muted:#667382;--border:#e6e7e9;
+  --primary:#206bc4;--primary-lt:#e8f0f9;--green:#2fb344;--green-lt:#eaf7ec;
+  --yellow:#f59f00;--yellow-lt:#fef5e6;--red:#d63939;--red-lt:#fbebeb;--purple:#ae3ec9;--purple-lt:#f7ecfa;
+  --shadow:0 1px 2px rgba(29,39,59,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#151f2c;--card:#1d2a3a;--text:#e6ebf1;--muted:#9aa5b4;--border:#2c3a4d;
+  --primary-lt:#1f3350;--green-lt:#1c3627;--yellow-lt:#3a3020;--red-lt:#3d2326;--purple-lt:#352544;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,&quot;Pretendard&quot;,&quot;Apple SD Gothic Neo&quot;,&quot;Malgun Gothic&quot;,sans-serif;font-size:14px;line-height:1.5}
+header{background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.navbar{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.brand{width:32px;height:32px;border-radius:8px;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700}
+.navbar h1{font-size:16px;margin:0;font-weight:600}
+.navbar .sub{color:var(--muted);font-size:12px}
+.navbar .right{margin-left:auto;font-size:12px;color:var(--muted);text-align:right}
+.tabs{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;gap:4px;overflow-x:auto}
+.tabs a{padding:10px 12px;color:var(--muted);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;font-weight:500}
+.tabs a.active,.tabs a:hover{color:var(--primary);border-color:var(--primary)}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 48px}
+.page-title{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px;margin-bottom:16px}
+.page-title .pre{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.page-title h2{margin:2px 0 0;font-size:20px}
+.page-title .actions{margin-left:auto}
+.alert{background:var(--primary-lt);border-left:4px solid var(--primary);padding:12px 14px;border-radius:6px;margin-bottom:16px}
+.alert b{color:var(--primary)}
+.grid{display:grid;gap:16px}
+.g-kpi{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.g-2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);min-width:0}
+.card-h{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-h h3{margin:0;font-size:15px;font-weight:600}
+.card-h .meta{margin-left:auto;color:var(--muted);font-size:12px}
+.card-b{padding:16px}
+.kpi{padding:14px 16px;display:flex;gap:12px;align-items:center}
+.ico{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:20px;flex:none}
+.kpi .lbl{color:var(--muted);font-size:12px}
+.kpi .val{font-size:16px;font-weight:700}
+.kpi .hint{font-size:12px;color:var(--muted)}
+.bg-green{background:var(--green-lt);color:var(--green)}.bg-yellow{background:var(--yellow-lt);color:var(--yellow)}
+.bg-red{background:var(--red-lt);color:var(--red)}.bg-blue{background:var(--primary-lt);color:var(--primary)}.bg-purple{background:var(--purple-lt);color:var(--purple)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.section{margin-top:24px}
+.list{list-style:none;margin:0;padding:0}
+.list li{padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start}
+.list li:last-child{border-bottom:0}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--primary)}
+.check label{flex:1;cursor:pointer}
+.check .done{text-decoration:line-through;color:var(--muted)}
+.check .when{font-size:12px;color:var(--muted);white-space:nowrap}
+.progress{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress span{display:block;height:100%;background:var(--primary);transition:width .2s}
+.timeline{position:relative;margin:0;padding:0 0 0 18px;list-style:none}
+.timeline:before{content:&quot;&quot;;position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--border)}
+.timeline li{position:relative;padding:0 0 14px 12px}
+.timeline li:before{content:&quot;&quot;;position:absolute;left:-18px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--primary)}
+.timeline li.now:before{background:var(--primary)}
+.timeline .t{font-weight:700;font-variant-numeric:tabular-nums}
+.timeline .d{color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--border)}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:4px;background:var(--border);min-width:60px}
+.bar span{display:block;height:100%;border-radius:4px}
+.table-wrap{overflow-x:auto}
+.review{padding:10px 0;border-bottom:1px solid var(--border)}
+.review:last-child{border-bottom:0}
+.review .tag{margin-right:6px}
+.rest{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.rest:last-child{border-bottom:0}
+.rest .name{font-weight:600}
+.rest .info{font-size:12px;color:var(--muted)}
+form.send{display:flex;gap:8px;flex-wrap:wrap}
+form.send input{flex:1;min-width:180px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:14px}
+.btn{padding:9px 16px;border:0;border-radius:6px;background:var(--primary);color:#fff;font-weight:600;cursor:pointer;font-size:14px}
+.btn-outline{background:transparent;color:var(--primary);border:1px solid var(--primary)}
+.toast{margin-top:10px;font-size:13px;display:none}
+.small{font-size:12px;color:var(--muted)}
+footer{max-width:1200px;margin:0 auto;padding:16px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header&gt;
+  &lt;div class=&quot;navbar&quot;&gt;
+    &lt;div class=&quot;brand&quot;&gt;D&lt;/div&gt;
+    &lt;div&gt;
+      &lt;h1&gt;드림파크 방문 내비게이터&lt;/h1&gt;
+      &lt;div class=&quot;sub&quot;&gt;연간회원 방문 준비 대시보드&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;right&quot;&gt;최종 갱신&lt;br&gt;&lt;b&gt;11/14(토) 06:00&lt;/b&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;nav class=&quot;tabs&quot;&gt;
+    &lt;a href=&quot;#status&quot; class=&quot;active&quot;&gt;현황판&lt;/a&gt;
+    &lt;a href=&quot;#prep&quot;&gt;준비할 것&lt;/a&gt;
+    &lt;a href=&quot;#schedule&quot;&gt;스케줄러&lt;/a&gt;
+    &lt;a href=&quot;#reviews&quot;&gt;후기 요약&lt;/a&gt;
+    &lt;a href=&quot;#food&quot;&gt;식당&lt;/a&gt;
+    &lt;a href=&quot;#send&quot;&gt;전송&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;
+
+&lt;main&gt;
+  &lt;div class=&quot;page-title&quot;&gt;
+    &lt;div&gt;
+      &lt;div class=&quot;pre&quot;&gt;방문 예정일&lt;/div&gt;
+      &lt;h2&gt;2026년 11월 14일 토요일 · D-0&lt;/h2&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;actions&quot;&gt;&lt;span class=&quot;badge bg-green&quot;&gt;방문 준비 양호&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;alert&quot;&gt;&lt;b&gt;오늘의 브리핑&lt;/b&gt; · 예상 소요 시간은 52분(평소보다 +12분)이에요. 정문 유료주차장 09:00 도착 기준 &lt;b&gt;08:05 출발&lt;/b&gt;을 권장해요. 발렛은 확보되어 있고, 오전 11시 이후 비 소식이 있어 야외 어트랙션을 먼저 도는 동선을 추천해요.&lt;/div&gt;
+
+  &lt;!-- 현황판 --&gt;
+  &lt;section id=&quot;status&quot;&gt;
+    &lt;div class=&quot;grid g-kpi&quot;&gt;
+      &lt;div class=&quot;card kpi&quot;&gt;&lt;div class=&quot;ico bg-green&quot;&gt;🅿&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;lbl&quot;&gt;발렛파킹&lt;/div&gt;&lt;div class=&quot;val&quot;&gt;예약 확정&lt;/div&gt;&lt;div class=&quot;hint&quot;&gt;09:00 정문 인계&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;card kpi&quot;&gt;&lt;div class=&quot;ico bg-yellow&quot;&gt;🚗&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;lbl&quot;&gt;정문주차장&lt;/div&gt;&lt;div class=&quot;val&quot;&gt;09:30 전 여유&lt;/div&gt;&lt;div class=&quot;hint&quot;&gt;지난 4주 토요일 평균 09:42 만차&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;card kpi&quot;&gt;&lt;div class=&quot;ico bg-green&quot;&gt;✓&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;lbl&quot;&gt;입장 예약&lt;/div&gt;&lt;div class=&quot;val&quot;&gt;예약 완료&lt;/div&gt;&lt;div class=&quot;hint&quot;&gt;연간회원 2인&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;card kpi&quot;&gt;&lt;div class=&quot;ico bg-blue&quot;&gt;☁&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;lbl&quot;&gt;날씨&lt;/div&gt;&lt;div class=&quot;val&quot;&gt;흐림 · 12°/4°&lt;/div&gt;&lt;div class=&quot;hint&quot;&gt;11시 이후 강수 60%&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;card kpi&quot;&gt;&lt;div class=&quot;ico bg-purple&quot;&gt;★&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;lbl&quot;&gt;오늘의 이벤트&lt;/div&gt;&lt;div class=&quot;val&quot;&gt;퍼레이드 2회&lt;/div&gt;&lt;div class=&quot;hint&quot;&gt;13:30 · 17:00 (우천 시 취소)&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class=&quot;card kpi&quot;&gt;&lt;div class=&quot;ico bg-red&quot;&gt;⏱&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;lbl&quot;&gt;혼잡 예상&lt;/div&gt;&lt;div class=&quot;val&quot;&gt;높음&lt;/div&gt;&lt;div class=&quot;hint&quot;&gt;지난주 토요일 최대 대기 85분&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;grid g-2 section&quot;&gt;
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;card-h&quot;&gt;&lt;h3&gt;지난 주말 대기열 (토요일)&lt;/h3&gt;&lt;span class=&quot;meta&quot;&gt;단위: 분&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;card-b table-wrap&quot;&gt;
+          &lt;table&gt;
+            &lt;thead&gt;&lt;tr&gt;&lt;th&gt;어트랙션&lt;/th&gt;&lt;th class=&quot;num&quot;&gt;10시&lt;/th&gt;&lt;th class=&quot;num&quot;&gt;13시&lt;/th&gt;&lt;th class=&quot;num&quot;&gt;16시&lt;/th&gt;&lt;th&gt;피크 대비&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+            &lt;tbody&gt;
+              &lt;tr&gt;&lt;td&gt;사파리 어드벤처&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;35&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;85&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;60&lt;/td&gt;&lt;td&gt;&lt;div class=&quot;bar&quot;&gt;&lt;span style=&quot;width:100%;background:var(--red)&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;
+              &lt;tr&gt;&lt;td&gt;기린 아일랜드&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;25&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;70&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;50&lt;/td&gt;&lt;td&gt;&lt;div class=&quot;bar&quot;&gt;&lt;span style=&quot;width:82%;background:var(--red)&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;
+              &lt;tr&gt;&lt;td&gt;판다 하우스&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;15&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;45&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;40&lt;/td&gt;&lt;td&gt;&lt;div class=&quot;bar&quot;&gt;&lt;span style=&quot;width:53%;background:var(--yellow)&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;
+              &lt;tr&gt;&lt;td&gt;우드 코스터&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;20&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;40&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;35&lt;/td&gt;&lt;td&gt;&lt;div class=&quot;bar&quot;&gt;&lt;span style=&quot;width:47%;background:var(--yellow)&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;
+              &lt;tr&gt;&lt;td&gt;스카이 곤돌라&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;5&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;15&lt;/td&gt;&lt;td class=&quot;num&quot;&gt;10&lt;/td&gt;&lt;td&gt;&lt;div class=&quot;bar&quot;&gt;&lt;span style=&quot;width:18%;background:var(--green)&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/tbody&gt;
+          &lt;/table&gt;
+          &lt;p class=&quot;small&quot;&gt;오전 10시 이전 입장 시 인기 어트랙션 2개를 대기 60분 이내로 탈 수 있었어요.&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;card-h&quot;&gt;&lt;h3&gt;출발 시간 역산&lt;/h3&gt;&lt;span class=&quot;meta&quot;&gt;출발지: 집&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;card-b&quot;&gt;
+          &lt;ul class=&quot;list&quot;&gt;
+            &lt;li&gt;&lt;span class=&quot;badge bg-blue&quot;&gt;목표&lt;/span&gt;&lt;div&gt;정문 유료주차장 &lt;b&gt;09:00&lt;/b&gt; 도착&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;span class=&quot;badge bg-yellow&quot;&gt;교통&lt;/span&gt;&lt;div&gt;예상 소요 52분 (고속도로 구간 정체 +12분)&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;span class=&quot;badge bg-purple&quot;&gt;여유&lt;/span&gt;&lt;div&gt;휴게·주유 여유 3분&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;span class=&quot;badge bg-green&quot;&gt;권장&lt;/span&gt;&lt;div&gt;&lt;b&gt;08:05 출발&lt;/b&gt; · 늦어도 08:15에는 출발&lt;/div&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 준비할 것 --&gt;
+  &lt;section id=&quot;prep&quot; class=&quot;section&quot;&gt;
+    &lt;div class=&quot;card&quot;&gt;
+      &lt;div class=&quot;card-h&quot;&gt;&lt;h3&gt;준비해야 할 것들&lt;/h3&gt;&lt;span class=&quot;meta&quot; id=&quot;prog-text&quot;&gt;0 / 7 완료&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;card-b&quot;&gt;
+        &lt;div class=&quot;progress&quot;&gt;&lt;span id=&quot;prog&quot; style=&quot;width:0&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+        &lt;ul class=&quot;list check&quot; id=&quot;checklist&quot;&gt;
+          &lt;li&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c1&quot; checked&gt;&lt;label for=&quot;c1&quot;&gt;입장 예약 확정 확인&lt;/label&gt;&lt;span class=&quot;when&quot;&gt;D-7&lt;/span&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c2&quot; checked&gt;&lt;label for=&quot;c2&quot;&gt;발렛파킹 예약 (실패 시 전날 23:58 취소표 알람)&lt;/label&gt;&lt;span class=&quot;when&quot;&gt;D-7&lt;/span&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c3&quot;&gt;&lt;label for=&quot;c3&quot;&gt;우비·우산 챙기기 (11시 이후 강수 60%)&lt;/label&gt;&lt;span class=&quot;when&quot;&gt;D-1&lt;/span&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c4&quot;&gt;&lt;label for=&quot;c4&quot;&gt;연간회원권 앱 로그인 상태 확인&lt;/label&gt;&lt;span class=&quot;when&quot;&gt;D-1&lt;/span&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c5&quot;&gt;&lt;label for=&quot;c5&quot;&gt;보조배터리 충전&lt;/label&gt;&lt;span class=&quot;when&quot;&gt;D-1&lt;/span&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c6&quot;&gt;&lt;label for=&quot;c6&quot;&gt;06:00 브리핑 확인 후 출발 시간 확정&lt;/label&gt;&lt;span class=&quot;when&quot;&gt;D-0&lt;/span&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c7&quot;&gt;&lt;label for=&quot;c7&quot;&gt;점심 식당 대기 등록 (11:20 전)&lt;/label&gt;&lt;span class=&quot;when&quot;&gt;D-0&lt;/span&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 스케줄러 --&gt;
+  &lt;section id=&quot;schedule&quot; class=&quot;section&quot;&gt;
+    &lt;div class=&quot;grid g-2&quot;&gt;
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;card-h&quot;&gt;&lt;h3&gt;당일 스케줄 · 추천 동선&lt;/h3&gt;&lt;span class=&quot;meta&quot;&gt;인기 어트랙션 우선&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;card-b&quot;&gt;
+          &lt;ol class=&quot;timeline&quot;&gt;
+            &lt;li class=&quot;now&quot;&gt;&lt;div class=&quot;t&quot;&gt;06:00&lt;/div&gt;&lt;div&gt;출발 전 브리핑 확인&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;교통·날씨·주차 현황 갱신&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;div class=&quot;t&quot;&gt;08:05&lt;/div&gt;&lt;div&gt;집 출발&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;예상 52분&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;div class=&quot;t&quot;&gt;09:00&lt;/div&gt;&lt;div&gt;정문 도착 · 발렛 인계&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;입장 게이트까지 도보 5분&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;div class=&quot;t&quot;&gt;09:30&lt;/div&gt;&lt;div&gt;사파리 어드벤처&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;예상 대기 30분 · 오전이 가장 짧음&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;div class=&quot;t&quot;&gt;10:40&lt;/div&gt;&lt;div&gt;기린 아일랜드&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;예상 대기 25분 · 비 오기 전 야외 먼저&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;div class=&quot;t&quot;&gt;11:30&lt;/div&gt;&lt;div&gt;점심 · 알프스 하우스&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;11:20 전 대기 등록&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;div class=&quot;t&quot;&gt;13:30&lt;/div&gt;&lt;div&gt;퍼레이드 관람&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;광장 중앙 좌측 추천 · 우천 시 실내 판다 하우스&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;div class=&quot;t&quot;&gt;15:00&lt;/div&gt;&lt;div&gt;판다 하우스 · 우드 코스터&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;실내 위주&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;div class=&quot;t&quot;&gt;17:30&lt;/div&gt;&lt;div&gt;퇴장 · 발렛 차량 수령&lt;/div&gt;&lt;div class=&quot;d&quot;&gt;귀가 정체 시작 전&lt;/div&gt;&lt;/li&gt;
+          &lt;/ol&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;card-h&quot;&gt;&lt;h3&gt;다가오는 일정&lt;/h3&gt;&lt;span class=&quot;meta&quot;&gt;이번 달&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;card-b&quot;&gt;
+          &lt;ul class=&quot;list&quot;&gt;
+            &lt;li&gt;&lt;span class=&quot;badge bg-green&quot;&gt;11/14 토&lt;/span&gt;&lt;div&gt;&lt;b&gt;방문&lt;/b&gt; · 발렛 확정, 입장 예약 완료&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;span class=&quot;badge bg-yellow&quot;&gt;11/20 금&lt;/span&gt;&lt;div&gt;&lt;b&gt;발렛 취소표 알람&lt;/b&gt; · 23:58&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;span class=&quot;badge bg-blue&quot;&gt;11/21 토&lt;/span&gt;&lt;div&gt;&lt;b&gt;방문 예정&lt;/b&gt; · 발렛 미확보, 입장 예약 가능&lt;/div&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;span class=&quot;badge bg-purple&quot;&gt;11/28 토&lt;/span&gt;&lt;div&gt;&lt;b&gt;시즌 이벤트 시작&lt;/b&gt; · 윈터 일루미네이션&lt;/div&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 후기 요약 --&gt;
+  &lt;section id=&quot;reviews&quot; class=&quot;section&quot;&gt;
+    &lt;div class=&quot;grid g-2&quot;&gt;
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;card-h&quot;&gt;&lt;h3&gt;이용자 후기 요약&lt;/h3&gt;&lt;span class=&quot;meta&quot;&gt;최근 7일 · 24건&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;card-b&quot;&gt;
+          &lt;div class=&quot;review&quot;&gt;&lt;span class=&quot;badge bg-red tag&quot;&gt;혼잡&lt;/span&gt;토요일 오전 10시 반 이후 사파리 대기가 급격히 늘었다는 후기가 많아요.&lt;/div&gt;
+          &lt;div class=&quot;review&quot;&gt;&lt;span class=&quot;badge bg-purple tag&quot;&gt;퍼레이드&lt;/span&gt;13:30 회차가 덜 붐비고, 광장 좌측에서 잘 보인다는 의견이 많아요.&lt;/div&gt;
+          &lt;div class=&quot;review&quot;&gt;&lt;span class=&quot;badge bg-yellow tag&quot;&gt;주차&lt;/span&gt;정문주차장은 09:40 전후로 만차되고, 이후에는 외곽 주차장 셔틀을 안내받았대요.&lt;/div&gt;
+          &lt;div class=&quot;review&quot;&gt;&lt;span class=&quot;badge bg-green tag&quot;&gt;팁&lt;/span&gt;비가 오면 야외 어트랙션 대기가 짧아지지만, 일부는 운행이 중단될 수 있어요.&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- 식당 --&gt;
+      &lt;div class=&quot;card&quot; id=&quot;food&quot;&gt;
+        &lt;div class=&quot;card-h&quot;&gt;&lt;h3&gt;식당 정보&lt;/h3&gt;&lt;span class=&quot;meta&quot;&gt;자주 가는 곳 기준&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;card-b&quot;&gt;
+          &lt;div class=&quot;rest&quot;&gt;&lt;div class=&quot;ico bg-blue&quot;&gt;🍝&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;name&quot;&gt;알프스 하우스 &lt;span class=&quot;badge bg-green&quot;&gt;동선 인접&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;info&quot;&gt;추천: 치즈 퐁듀 세트, 돈가스 · 대기 약 20분 · 기린 아일랜드 도보 3분&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+          &lt;div class=&quot;rest&quot;&gt;&lt;div class=&quot;ico bg-yellow&quot;&gt;🍜&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;name&quot;&gt;우드랜드 키친&lt;/div&gt;&lt;div class=&quot;info&quot;&gt;추천: 우동, 키즈 세트 · 대기 약 10분 · 판다 하우스 앞&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+          &lt;div class=&quot;rest&quot;&gt;&lt;div class=&quot;ico bg-purple&quot;&gt;☕&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;name&quot;&gt;글래스 카페&lt;/div&gt;&lt;div class=&quot;info&quot;&gt;추천: 츄러스, 핫초코 · 퍼레이드 대기 중 간식&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+          &lt;div class=&quot;rest&quot;&gt;&lt;div class=&quot;ico bg-green&quot;&gt;🍖&lt;/div&gt;&lt;div&gt;&lt;div class=&quot;name&quot;&gt;파크 밖 · 숲속 갈비&lt;/div&gt;&lt;div class=&quot;info&quot;&gt;추천: 숯불 돼지갈비 · 귀갓길 저녁 · 정문에서 차로 7분&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 전송 데모 --&gt;
+  &lt;section id=&quot;send&quot; class=&quot;section&quot;&gt;
+    &lt;div class=&quot;card&quot;&gt;
+      &lt;div class=&quot;card-h&quot;&gt;&lt;h3&gt;휴대폰으로 보내기&lt;/h3&gt;&lt;span class=&quot;badge bg-yellow&quot;&gt;데모&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;card-b&quot;&gt;
+        &lt;form class=&quot;send&quot; id=&quot;sendForm&quot;&gt;
+          &lt;input type=&quot;tel&quot; id=&quot;phone&quot; placeholder=&quot;010-0000-0000&quot; inputmode=&quot;numeric&quot; autocomplete=&quot;off&quot;&gt;
+          &lt;button class=&quot;btn&quot; type=&quot;submit&quot;&gt;페이지 전송&lt;/button&gt;
+        &lt;/form&gt;
+        &lt;div class=&quot;toast&quot; id=&quot;toast&quot;&gt;&lt;/div&gt;
+        &lt;p class=&quot;small&quot;&gt;데모 기능이에요. 실제 문자 발송 서비스와는 연결되어 있지 않아요.&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+&lt;/main&gt;
+
+&lt;footer&gt;드림파크 방문 내비게이터 · 샘플 화면 (가상 데이터)&lt;/footer&gt;
+
+&lt;script&gt;
+(function(){
+  var boxes=document.querySelectorAll(&#x27;#checklist input&#x27;);
+  function update(){
+    var done=0;
+    boxes.forEach(function(b){ b.nextElementSibling.classList.toggle(&#x27;done&#x27;,b.checked); if(b.checked)done++; });
+    document.getElementById(&#x27;prog&#x27;).style.width=(done/boxes.length*100)+&#x27;%&#x27;;
+    document.getElementById(&#x27;prog-text&#x27;).textContent=done+&#x27; / &#x27;+boxes.length+&#x27; 완료&#x27;;
+  }
+  boxes.forEach(function(b){ b.addEventListener(&#x27;change&#x27;,update); });
+  update();
+
+  document.getElementById(&#x27;sendForm&#x27;).addEventListener(&#x27;submit&#x27;,function(e){
+    e.preventDefault();
+    var v=document.getElementById(&#x27;phone&#x27;).value.replace(/[^0-9]/g,&#x27;&#x27;);
+    var t=document.getElementById(&#x27;toast&#x27;);
+    t.style.display=&#x27;block&#x27;;
+    if(!/^01[0-9]{8,9}$/.test(v)){ t.style.color=&#x27;var(--red)&#x27;; t.textContent=&#x27;휴대폰 번호 형식을 확인해 주세요.&#x27;; return; }
+    t.style.color=&#x27;var(--green)&#x27;;
+    t.textContent=&#x27;(데모) &#x27;+v.replace(/(\d{3})(\d{3,4})(\d{4})/,&#x27;$1-$2-$3&#x27;)+&#x27; 번호로 전송을 요청했어요. 실제로 발송되지는 않아요.&#x27;;
+  });
+
+  var links=document.querySelectorAll(&#x27;.tabs a&#x27;);
+  links.forEach(function(a){ a.addEventListener(&#x27;click&#x27;,function(){ links.forEach(function(x){x.classList.remove(&#x27;active&#x27;)}); a.classList.add(&#x27;active&#x27;); }); });
+})();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe></div>
+  </section>
+</main>
+
+<footer>참고: 업무설계서.md · CLAUDE.md · .claude/agents/*.md · workflow.md · reference/example.html</footer>
+
+<script>
+(function(){
+  var f=document.getElementById('sampleFrame');
+  document.querySelectorAll('.sample-bar .btn[data-w]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.sample-bar .btn[data-w]').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on'); f.style.width=b.getAttribute('data-w');
+    });
+  });
+  document.getElementById('openNew').addEventListener('click',function(){
+    var url=URL.createObjectURL(new Blob([f.getAttribute('srcdoc')],{type:'text/html'}));
+    window.open(url,'_blank');
+  });
+})();
+</script>
+</body>
+</html>

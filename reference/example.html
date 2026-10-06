@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>방문 준비 대시보드</title>
+<style>
+:root{
+  --bg:#f6f8fb;--card:#ffffff;--text:#1d273b;--muted:#667382;--border:#e6e7e9;
+  --primary:#206bc4;--primary-lt:#e8f0f9;--green:#2fb344;--green-lt:#eaf7ec;
+  --yellow:#f59f00;--yellow-lt:#fef5e6;--red:#d63939;--red-lt:#fbebeb;--purple:#ae3ec9;--purple-lt:#f7ecfa;
+  --shadow:0 1px 2px rgba(29,39,59,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#151f2c;--card:#1d2a3a;--text:#e6ebf1;--muted:#9aa5b4;--border:#2c3a4d;
+  --primary-lt:#1f3350;--green-lt:#1c3627;--yellow-lt:#3a3020;--red-lt:#3d2326;--purple-lt:#352544;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:14px;line-height:1.5}
+header{background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.navbar{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.brand{width:32px;height:32px;border-radius:8px;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700}
+.navbar h1{font-size:16px;margin:0;font-weight:600}
+.navbar .sub{color:var(--muted);font-size:12px}
+.navbar .right{margin-left:auto;font-size:12px;color:var(--muted);text-align:right}
+.tabs{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;gap:4px;overflow-x:auto}
+.tabs a{padding:10px 12px;color:var(--muted);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;font-weight:500}
+.tabs a.active,.tabs a:hover{color:var(--primary);border-color:var(--primary)}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 48px}
+.page-title{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px;margin-bottom:16px}
+.page-title .pre{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.page-title h2{margin:2px 0 0;font-size:20px}
+.page-title .actions{margin-left:auto}
+.alert{background:var(--primary-lt);border-left:4px solid var(--primary);padding:12px 14px;border-radius:6px;margin-bottom:16px}
+.alert b{color:var(--primary)}
+.grid{display:grid;gap:16px}
+.g-kpi{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.g-2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);min-width:0}
+.card-h{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-h h3{margin:0;font-size:15px;font-weight:600}
+.card-h .meta{margin-left:auto;color:var(--muted);font-size:12px}
+.card-b{padding:16px}
+.kpi{padding:14px 16px;display:flex;gap:12px;align-items:center}
+.ico{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:20px;flex:none}
+.kpi .lbl{color:var(--muted);font-size:12px}
+.kpi .val{font-size:16px;font-weight:700}
+.kpi .hint{font-size:12px;color:var(--muted)}
+.bg-green{background:var(--green-lt);color:var(--green)}.bg-yellow{background:var(--yellow-lt);color:var(--yellow)}
+.bg-red{background:var(--red-lt);color:var(--red)}.bg-blue{background:var(--primary-lt);color:var(--primary)}.bg-purple{background:var(--purple-lt);color:var(--purple)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.section{margin-top:24px}
+.list{list-style:none;margin:0;padding:0}
+.list li{padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start}
+.list li:last-child{border-bottom:0}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--primary)}
+.check label{flex:1;cursor:pointer}
+.check .done{text-decoration:line-through;color:var(--muted)}
+.check .when{font-size:12px;color:var(--muted);white-space:nowrap}
+.progress{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress span{display:block;height:100%;background:var(--primary);transition:width .2s}
+.timeline{position:relative;margin:0;padding:0 0 0 18px;list-style:none}
+.timeline:before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--border)}
+.timeline li{position:relative;padding:0 0 14px 12px}
+.timeline li:before{content:"";position:absolute;left:-18px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--primary)}
+.timeline li.now:before{background:var(--primary)}
+.timeline .t{font-weight:700;font-variant-numeric:tabular-nums}
+.timeline .d{color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--border)}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:4px;background:var(--border);min-width:60px}
+.bar span{display:block;height:100%;border-radius:4px}
+.table-wrap{overflow-x:auto}
+.review{padding:10px 0;border-bottom:1px solid var(--border)}
+.review:last-child{border-bottom:0}
+.review .tag{margin-right:6px}
+.rest{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.rest:last-child{border-bottom:0}
+.rest .name{font-weight:600}
+.rest .info{font-size:12px;color:var(--muted)}
+form.send{display:flex;gap:8px;flex-wrap:wrap}
+form.send input{flex:1;min-width:180px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:14px}
+.btn{padding:9px 16px;border:0;border-radius:6px;background:var(--primary);color:#fff;font-weight:600;cursor:pointer;font-size:14px}
+.btn-outline{background:transparent;color:var(--primary);border:1px solid var(--primary)}
+.toast{margin-top:10px;font-size:13px;display:none}
+.small{font-size:12px;color:var(--muted)}
+footer{max-width:1200px;margin:0 auto;padding:16px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header>
+  <div class="navbar">
+    <div class="brand">D</div>
+    <div>
+      <h1>드림파크 방문 내비게이터</h1>
+      <div class="sub">연간회원 방문 준비 대시보드</div>
+    </div>
+    <div class="right">최종 갱신<br><b>11/14(토) 06:00</b></div>
+  </div>
+  <nav class="tabs">
+    <a href="#status" class="active">현황판</a>
+    <a href="#prep">준비할 것</a>
+    <a href="#schedule">스케줄러</a>
+    <a href="#reviews">후기 요약</a>
+    <a href="#food">식당</a>
+    <a href="#send">전송</a>
+  </nav>
+</header>
+
+<main>
+  <div class="page-title">
+    <div>
+      <div class="pre">방문 예정일</div>
+      <h2>2026년 11월 14일 토요일 · D-0</h2>
+    </div>
+    <div class="actions"><span class="badge bg-green">방문 준비 양호</span></div>
+  </div>
+
+  <div class="alert"><b>오늘의 브리핑</b> · 예상 소요 시간은 52분(평소보다 +12분)이에요. 정문 유료주차장 09:00 도착 기준 <b>08:05 출발</b>을 권장해요. 발렛은 확보되어 있고, 오전 11시 이후 비 소식이 있어 야외 어트랙션을 먼저 도는 동선을 추천해요.</div>
+
+  <!-- 현황판 -->
+  <section id="status">
+    <div class="grid g-kpi">
+      <div class="card kpi"><div class="ico bg-green">🅿</div><div><div class="lbl">발렛파킹</div><div class="val">예약 확정</div><div class="hint">09:00 정문 인계</div></div></div>
+      <div class="card kpi"><div class="ico bg-yellow">🚗</div><div><div class="lbl">정문주차장</div><div class="val">09:30 전 여유</div><div class="hint">지난 4주 토요일 평균 09:42 만차</div></div></div>
+      <div class="card kpi"><div class="ico bg-green">✓</div><div><div class="lbl">입장 예약</div><div class="val">예약 완료</div><div class="hint">연간회원 2인</div></div></div>
+      <div class="card kpi"><div class="ico bg-blue">☁</div><div><div class="lbl">날씨</div><div class="val">흐림 · 12°/4°</div><div class="hint">11시 이후 강수 60%</div></div></div>
+      <div class="card kpi"><div class="ico bg-purple">★</div><div><div class="lbl">오늘의 이벤트</div><div class="val">퍼레이드 2회</div><div class="hint">13:30 · 17:00 (우천 시 취소)</div></div></div>
+      <div class="card kpi"><div class="ico bg-red">⏱</div><div><div class="lbl">혼잡 예상</div><div class="val">높음</div><div class="hint">지난주 토요일 최대 대기 85분</div></div></div>
+    </div>
+
+    <div class="grid g-2 section">
+      <div class="card">
+        <div class="card-h"><h3>지난 주말 대기열 (토요일)</h3><span class="meta">단위: 분</span></div>
+        <div class="card-b table-wrap">
+          <table>
+            <thead><tr><th>어트랙션</th><th class="num">10시</th><th class="num">13시</th><th class="num">16시</th><th>피크 대비</th></tr></thead>
+            <tbody>
+              <tr><td>사파리 어드벤처</td><td class="num">35</td><td class="num">85</td><td class="num">60</td><td><div class="bar"><span style="width:100%;background:var(--red)"></span></div></td></tr>
+              <tr><td>기린 아일랜드</td><td class="num">25</td><td class="num">70</td><td class="num">50</td><td><div class="bar"><span style="width:82%;background:var(--red)"></span></div></td></tr>
+              <tr><td>판다 하우스</td><td class="num">15</td><td class="num">45</td><td class="num">40</td><td><div class="bar"><span style="width:53%;background:var(--yellow)"></span></div></td></tr>
+              <tr><td>우드 코스터</td><td class="num">20</td><td class="num">40</td><td class="num">35</td><td><div class="bar"><span style="width:47%;background:var(--yellow)"></span></div></td></tr>
+              <tr><td>스카이 곤돌라</td><td class="num">5</td><td class="num">15</td><td class="num">10</td><td><div class="bar"><span style="width:18%;background:var(--green)"></span></div></td></tr>
+            </tbody>
+          </table>
+          <p class="small">오전 10시 이전 입장 시 인기 어트랙션 2개를 대기 60분 이내로 탈 수 있었어요.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>출발 시간 역산</h3><span class="meta">출발지: 집</span></div>
+        <div class="card-b">
+          <ul class="list">
+            <li><span class="badge bg-blue">목표</span><div>정문 유료주차장 <b>09:00</b> 도착</div></li>
+            <li><span class="badge bg-yellow">교통</span><div>예상 소요 52분 (고속도로 구간 정체 +12분)</div></li>
+            <li><span class="badge bg-purple">여유</span><div>휴게·주유 여유 3분</div></li>
+            <li><span class="badge bg-green">권장</span><div><b>08:05 출발</b> · 늦어도 08:15에는 출발</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 준비할 것 -->
+  <section id="prep" class="section">
+    <div class="card">
+      <div class="card-h"><h3>준비해야 할 것들</h3><span class="meta" id="prog-text">0 / 7 완료</span></div>
+      <div class="card-b">
+        <div class="progress"><span id="prog" style="width:0"></span></div>
+        <ul class="list check" id="checklist">
+          <li><input type="checkbox" id="c1" checked><label for="c1">입장 예약 확정 확인</label><span class="when">D-7</span></li>
+          <li><input type="checkbox" id="c2" checked><label for="c2">발렛파킹 예약 (실패 시 전날 23:58 취소표 알람)</label><span class="when">D-7</span></li>
+          <li><input type="checkbox" id="c3"><label for="c3">우비·우산 챙기기 (11시 이후 강수 60%)</label><span class="when">D-1</span></li>
+          <li><input type="checkbox" id="c4"><label for="c4">연간회원권 앱 로그인 상태 확인</label><span class="when">D-1</span></li>
+          <li><input type="checkbox" id="c5"><label for="c5">보조배터리 충전</label><span class="when">D-1</span></li>
+          <li><input type="checkbox" id="c6"><label for="c6">06:00 브리핑 확인 후 출발 시간 확정</label><span class="when">D-0</span></li>
+          <li><input type="checkbox" id="c7"><label for="c7">점심 식당 대기 등록 (11:20 전)</label><span class="when">D-0</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 스케줄러 -->
+  <section id="schedule" class="section">
+    <div class="grid g-2">
+      <div class="card">
+        <div class="card-h"><h3>당일 스케줄 · 추천 동선</h3><span class="meta">인기 어트랙션 우선</span></div>
+        <div class="card-b">
+          <ol class="timeline">
+            <li class="now"><div class="t">06:00</div><div>출발 전 브리핑 확인</div><div class="d">교통·날씨·주차 현황 갱신</div></li>
+            <li><div class="t">08:05</div><div>집 출발</div><div class="d">예상 52분</div></li>
+            <li><div class="t">09:00</div><div>정문 도착 · 발렛 인계</div><div class="d">입장 게이트까지 도보 5분</div></li>
+            <li><div class="t">09:30</div><div>사파리 어드벤처</div><div class="d">예상 대기 30분 · 오전이 가장 짧음</div></li>
+            <li><div class="t">10:40</div><div>기린 아일랜드</div><div class="d">예상 대기 25분 · 비 오기 전 야외 먼저</div></li>
+            <li><div class="t">11:30</div><div>점심 · 알프스 하우스</div><div class="d">11:20 전 대기 등록</div></li>
+            <li><div class="t">13:30</div><div>퍼레이드 관람</div><div class="d">광장 중앙 좌측 추천 · 우천 시 실내 판다 하우스</div></li>
+            <li><div class="t">15:00</div><div>판다 하우스 · 우드 코스터</div><div class="d">실내 위주</div></li>
+            <li><div class="t">17:30</div><div>퇴장 · 발렛 차량 수령</div><div class="d">귀가 정체 시작 전</div></li>
+          </ol>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>다가오는 일정</h3><span class="meta">이번 달</span></div>
+        <div class="card-b">
+          <ul class="list">
+            <li><span class="badge bg-green">11/14 토</span><div><b>방문</b> · 발렛 확정, 입장 예약 완료</div></li>
+            <li><span class="badge bg-yellow">11/20 금</span><div><b>발렛 취소표 알람</b> · 23:58</div></li>
+            <li><span class="badge bg-blue">11/21 토</span><div><b>방문 예정</b> · 발렛 미확보, 입장 예약 가능</div></li>
+            <li><span class="badge bg-purple">11/28 토</span><div><b>시즌 이벤트 시작</b> · 윈터 일루미네이션</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 후기 요약 -->
+  <section id="reviews" class="section">
+    <div class="grid g-2">
+      <div class="card">
+        <div class="card-h"><h3>이용자 후기 요약</h3><span class="meta">최근 7일 · 24건</span></div>
+        <div class="card-b">
+          <div class="review"><span class="badge bg-red tag">혼잡</span>토요일 오전 10시 반 이후 사파리 대기가 급격히 늘었다는 후기가 많아요.</div>
+          <div class="review"><span class="badge bg-purple tag">퍼레이드</span>13:30 회차가 덜 붐비고, 광장 좌측에서 잘 보인다는 의견이 많아요.</div>
+          <div class="review"><span class="badge bg-yellow tag">주차</span>정문주차장은 09:40 전후로 만차되고, 이후에는 외곽 주차장 셔틀을 안내받았대요.</div>
+          <div class="review"><span class="badge bg-green tag">팁</span>비가 오면 야외 어트랙션 대기가 짧아지지만, 일부는 운행이 중단될 수 있어요.</div>
+        </div>
+      </div>
+
+      <!-- 식당 -->
+      <div class="card" id="food">
+        <div class="card-h"><h3>식당 정보</h3><span class="meta">자주 가는 곳 기준</span></div>
+        <div class="card-b">
+          <div class="rest"><div class="ico bg-blue">🍝</div><div><div class="name">알프스 하우스 <span class="badge bg-green">동선 인접</span></div><div class="info">추천: 치즈 퐁듀 세트, 돈가스 · 대기 약 20분 · 기린 아일랜드 도보 3분</div></div></div>
+          <div class="rest"><div class="ico bg-yellow">🍜</div><div><div class="name">우드랜드 키친</div><div class="info">추천: 우동, 키즈 세트 · 대기 약 10분 · 판다 하우스 앞</div></div></div>
+          <div class="rest"><div class="ico bg-purple">☕</div><div><div class="name">글래스 카페</div><div class="info">추천: 츄러스, 핫초코 · 퍼레이드 대기 중 간식</div></div></div>
+          <div class="rest"><div class="ico bg-green">🍖</div><div><div class="name">파크 밖 · 숲속 갈비</div><div class="info">추천: 숯불 돼지갈비 · 귀갓길 저녁 · 정문에서 차로 7분</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 전송 데모 -->
+  <section id="send" class="section">
+    <div class="card">
+      <div class="card-h"><h3>휴대폰으로 보내기</h3><span class="badge bg-yellow">데모</span></div>
+      <div class="card-b">
+        <form class="send" id="sendForm">
+          <input type="tel" id="phone" placeholder="010-0000-0000" inputmode="numeric" autocomplete="off">
+          <button class="btn" type="submit">페이지 전송</button>
+        </form>
+        <div class="toast" id="toast"></div>
+        <p class="small">데모 기능이에요. 실제 문자 발송 서비스와는 연결되어 있지 않아요.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>드림파크 방문 내비게이터 · 샘플 화면 (가상 데이터)</footer>
+
+<script>
+(function(){
+  var boxes=document.querySelectorAll('#checklist input');
+  function update(){
+    var done=0;
+    boxes.forEach(function(b){ b.nextElementSibling.classList.toggle('done',b.checked); if(b.checked)done++; });
+    document.getElementById('prog').style.width=(done/boxes.length*100)+'%';
+    document.getElementById('prog-text').textContent=done+' / '+boxes.length+' 완료';
+  }
+  boxes.forEach(function(b){ b.addEventListener('change',update); });
+  update();
+
+  document.getElementById('sendForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=document.getElementById('phone').value.replace(/[^0-9]/g,'');
+    var t=document.getElementById('toast');
+    t.style.display='block';
+    if(!/^01[0-9]{8,9}$/.test(v)){ t.style.color='var(--red)'; t.textContent='휴대폰 번호 형식을 확인해 주세요.'; return; }
+    t.style.color='var(--green)';
+    t.textContent='(데모) '+v.replace(/(\d{3})(\d{3,4})(\d{4})/,'$1-$2-$3')+' 번호로 전송을 요청했어요. 실제로 발송되지는 않아요.';
+  });
+
+  var links=document.querySelectorAll('.tabs a');
+  links.forEach(function(a){ a.addEventListener('click',function(){ links.forEach(function(x){x.classList.remove('active')}); a.classList.add('active'); }); });
+})();
+</script>
+</body>
+</html>

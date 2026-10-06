@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에버랜드 방문 내비게이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f7ff;--card:#fff;--text:#607080;--heading:#25396f;--muted:rgba(96,112,128,.75);--border:#dce7f1;--soft:#f2f7ff;
+  --primary:#435ebe;--primary-lt:#e6eaf8;--purple:#9694ff;--blue:#57caeb;--green:#5ddab4;--red:#ff7976;--yellow:#ffc434;
+  --success:#198754;--warning:#e09b00;--danger:#dc3545;--side:300px;
+}
+:root[data-theme="dark"]{
+  --bg:#151521;--card:#1e1e2d;--text:#a7a8b5;--heading:#e4e4ef;--muted:#7c7d8e;--border:#2b2b40;--soft:#232333;--primary-lt:#2a3157;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151521;--card:#1e1e2d;--text:#a7a8b5;--heading:#e4e4ef;--muted:#7c7d8e;--border:#2b2b40;--soft:#232333;--primary-lt:#2a3157;}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Nunito","Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:1rem;line-height:1.5}
+a{color:var(--primary);text-decoration:none}
+h3,h4,h5,h6{color:var(--heading);margin:0}
+/* sidebar */
+#sidebar{position:fixed;inset:0 auto 0 0;width:var(--side);background:var(--card);z-index:30;overflow-y:auto;transition:transform .25s}
+.sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:2rem 2rem 1rem}
+.logo{display:flex;align-items:center;gap:.5rem;font-size:1.35rem;font-weight:800;color:var(--primary)}
+.theme-toggle{display:flex;align-items:center;gap:.4rem;color:var(--text)}
+.switch{position:relative;width:2.2rem;height:1.2rem;border-radius:1rem;background:var(--border);border:0;cursor:pointer;padding:0}
+.switch:after{content:"";position:absolute;top:.15rem;left:.15rem;width:.9rem;height:.9rem;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s}
+:root[data-theme="dark"] .switch{background:var(--primary)} :root[data-theme="dark"] .switch:after{left:1.15rem}
+.sidebar-title{padding:0 2rem;margin:1.5rem 0 .6rem;font-weight:600;color:var(--heading);font-size:1rem}
+.menu{list-style:none;margin:0;padding:0 2rem}
+.sidebar-link{display:flex;align-items:center;gap:1rem;padding:.7rem 1rem;border-radius:.5rem;color:#25396f;font-weight:600;margin-bottom:.3rem;transition:background .15s}
+:root[data-theme="dark"] .sidebar-link{color:var(--text)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sidebar-link{color:var(--text)}}
+.sidebar-link i{color:#7c8db5;font-size:1.05rem}
+.sidebar-link:hover{background:var(--soft)}
+.sidebar-item.active .sidebar-link{background:var(--primary);color:#fff}
+.sidebar-item.active .sidebar-link i{color:#fff}
+.sidebar-foot{padding:1.5rem 2rem;font-size:.8rem;color:var(--muted)}
+/* main */
+#main{margin-left:var(--side);padding:2rem}
+.burger{display:none;background:none;border:0;font-size:1.8rem;color:var(--heading);cursor:pointer;padding:0;margin-bottom:.5rem}
+.page-heading{margin-bottom:2rem;display:flex;flex-wrap:wrap;align-items:flex-end;gap:.5rem 1rem}
+.page-heading h3{font-size:1.75rem;font-weight:700}
+.page-heading p{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:1.5rem;align-items:start}
+.col{display:flex;flex-direction:column;gap:1.5rem;min-width:0}
+.card{background:var(--card);border-radius:.7rem;border:0;min-width:0}
+.card-header{padding:1.5rem 1.5rem .5rem;display:flex;align-items:center;gap:.6rem}
+.card-header h4{font-size:1.2rem;font-weight:700}
+.card-header .meta{margin-left:auto;font-size:.8rem;color:var(--muted);text-align:right}
+.card-body{padding:1rem 1.5rem 1.5rem}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem}
+@media (min-width:1700px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stat{padding:1.5rem;display:flex;gap:1rem;align-items:flex-start}
+.stats-icon{width:3rem;height:3rem;border-radius:.5rem;display:grid;place-items:center;color:#fff;font-size:1.4rem;flex:none}
+.stats-icon.purple{background:var(--purple)}.stats-icon.blue{background:var(--blue)}.stats-icon.green{background:var(--green)}
+.stats-icon.red{background:var(--red)}.stats-icon.yellow{background:var(--yellow)}.stats-icon.navy{background:var(--primary)}
+.stat h6{font-size:.95rem;color:var(--muted);font-weight:600;margin-bottom:.25rem}
+.stat .val{font-weight:700;color:var(--heading);font-size:.92rem;line-height:1.45}
+.stat .src{font-size:.75rem;color:var(--muted);margin-top:.35rem}
+/* brief */
+.brief{display:flex;gap:1.25rem;align-items:flex-start}
+.brief p{margin:0}
+/* table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;color:var(--heading);font-weight:700;padding:.8rem 1rem;border-bottom:2px solid var(--border);font-size:.9rem}
+td{padding:.8rem 1rem;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-weight:700;color:var(--heading);font-variant-numeric:tabular-nums}
+.bar{height:.6rem;border-radius:1rem;background:var(--soft);min-width:70px}
+.bar span{display:block;height:100%;border-radius:1rem}
+/* timeline */
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{display:grid;grid-template-columns:7.5rem 1fr;gap:1rem;padding:.8rem 0;border-bottom:1px dashed var(--border)}
+.timeline li:last-child{border-bottom:0}
+.timeline .t{font-weight:700;color:var(--primary)}
+.timeline li.p-green .t{color:#2fb38a}.timeline li.p-blue .t{color:#2aa8cc}.timeline li.p-red .t{color:#e2605d}
+.timeline .d{font-size:.8rem;color:var(--muted)}
+/* right column */
+.visit{display:flex;align-items:center;gap:1rem;padding:1.5rem}
+.avatar{width:3.5rem;height:3.5rem;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;color:#fff;flex:none}
+.avatar.sm{width:2.6rem;height:2.6rem;font-size:1.1rem}
+.visit h5{font-size:1.15rem;font-weight:700}
+.visit .sub{color:var(--muted);font-size:.9rem}
+.verdict .big{font-size:2rem;font-weight:800;color:var(--heading)}
+.progress{height:.6rem;background:var(--soft);border-radius:1rem;overflow:hidden;margin-bottom:.4rem}
+.progress span{display:block;height:100%;background:var(--primary);transition:width .2s}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;gap:.7rem;align-items:flex-start;padding:.65rem 0;border-bottom:1px solid var(--border);font-size:.92rem}
+.list li:last-child{border-bottom:0}
+.list input{width:1.1rem;height:1.1rem;margin-top:.2rem;accent-color:var(--primary);flex:none}
+.list label{flex:1;cursor:pointer}
+.list .done{text-decoration:line-through;color:var(--muted)}
+.review{display:flex;gap:.9rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--border)}
+.review:last-child{border-bottom:0}
+.rest{display:flex;gap:.9rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--border)}
+.rest:last-child{border-bottom:0}
+.rest .name{font-weight:700;color:var(--heading)}
+.rest .info{font-size:.85rem}
+.rest .sub{font-size:.78rem;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:.375rem;border:1px solid var(--primary);background:transparent;color:var(--primary);font-weight:700;font-family:inherit;font-size:.95rem;cursor:pointer;width:100%}
+.btn:hover,.btn-primary{background:var(--primary);color:#fff}
+form.send{display:flex;flex-direction:column;gap:.7rem}
+form.send input{padding:.6rem .9rem;border:1px solid var(--border);border-radius:.375rem;background:var(--card);color:var(--heading);font-size:1rem;font-family:inherit}
+form.send input:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 .2rem rgba(67,94,190,.15)}
+.toast{font-size:.85rem;display:none}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .65rem;border-radius:.375rem;font-size:.78rem;font-weight:700;color:#fff}
+.bg-danger{background:var(--danger)}.bg-warning{background:var(--warning)}.bg-success{background:var(--success)}.bg-primary{background:var(--primary)}
+.small{font-size:.82rem;color:var(--muted)}
+.warnbox{background:#ffe5e5;color:#b42318;border-radius:.7rem;padding:1rem 1.25rem;margin-bottom:1.5rem;font-weight:600}
+footer{margin-top:2rem;font-size:.8rem;color:var(--muted)}
+.overlay{display:none}
+@media (max-width:1299px){.layout{grid-template-columns:minmax(0,1fr)}.right{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem}}
+@media (max-width:1199px){
+  #sidebar{transform:translateX(-100%)} body.menu-open #sidebar{transform:none}
+  body.menu-open .overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:25}
+  #main{margin-left:0;padding:1.5rem 1rem}
+  .burger{display:block}
+}
+@media (max-width:991px){.right{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:575px){.stats{grid-template-columns:minmax(0,1fr)}.timeline li{grid-template-columns:minmax(0,1fr);gap:.2rem}.page-heading h3{font-size:1.45rem}}
+</style>
+</head>
+<body>
+<div id="sidebar">
+  <div class="sidebar-header">
+    <a class="logo" href="#top"><i class="bi bi-compass-fill"></i>내비게이터</a>
+    <div class="theme-toggle"><i class="bi bi-sun"></i><button class="switch" id="themeSwitch" aria-label="다크 모드 전환"></button><i class="bi bi-moon"></i></div>
+  </div>
+  <div class="sidebar-title">방문 준비</div>
+  <ul class="menu">
+    <li class="sidebar-item active"><a class="sidebar-link" href="#top"><i class="bi bi-grid-fill"></i>현황판</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#brief"><i class="bi bi-megaphone-fill"></i>06:00 브리핑</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#waits"><i class="bi bi-hourglass-split"></i>대기시간</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#schedule"><i class="bi bi-calendar-week-fill"></i>스케줄러</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#reviews"><i class="bi bi-chat-square-text-fill"></i>후기 요약</a></li>
+  </ul>
+  <div class="sidebar-title">내 정보</div>
+  <ul class="menu">
+    <li class="sidebar-item"><a class="sidebar-link" href="#prep"><i class="bi bi-check2-square"></i>준비해야 할 것들</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#food"><i class="bi bi-cup-hot-fill"></i>식당 정보</a></li>
+    <li class="sidebar-item"><a class="sidebar-link" href="#send"><i class="bi bi-phone-fill"></i>휴대폰 전송 (데모)</a></li>
+  </ul>
+  <div class="sidebar-foot">수집 2026-10-06 16:13<br>AI ③ → AI ① → Evaluator</div>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<div id="main">
+  <button class="burger" id="burger" aria-label="메뉴 열기"><i class="bi bi-justify"></i></button>
+  <div class="page-heading" id="top">
+    <h3>방문 현황판</h3>
+    <p>2026년 10월 10일 토요일 · 에버랜드</p>
+  </div>
+
+  {{BANNER}}
+
+  <div class="layout">
+    <div class="col">
+      <section class="stats">{{KPI}}</section>
+
+      <section class="card" id="brief">
+        <div class="card-header"><h4>06:00 브리핑</h4></div>
+        <div class="card-body brief">
+          <div class="stats-icon navy"><i class="bi bi-megaphone-fill"></i></div>
+          <p>{{BRIEF}}</p>
+        </div>
+      </section>
+
+      <section class="card" id="waits">
+        <div class="card-header"><h4>어트랙션 대기시간 상위 8</h4><span class="meta">{{WAIT_AT}} · 분</span></div>
+        <div class="card-body table-wrap">
+          <table>
+            <thead><tr><th>어트랙션</th><th>존</th><th style="text-align:right">대기</th><th>비교</th></tr></thead>
+            <tbody>{{WAITS}}</tbody>
+          </table>
+          <p class="small">방문일과 같은 토요일 이력이 아직 없어 화요일 기록 1건을 참고용으로 보여줘요.</p>
+        </div>
+      </section>
+
+      <section class="card" id="schedule">
+        <div class="card-header"><h4>스케줄러 · 사파리·와일드 사바나 중심 동선</h4></div>
+        <div class="card-body"><ul class="timeline">{{TIMELINE}}</ul></div>
+      </section>
+
+      <section class="card" id="reviews">
+        <div class="card-header"><h4>이용자 후기 요약</h4><span class="meta">웹 검색 · 보조 근거</span></div>
+        <div class="card-body">{{REVIEWS}}</div>
+      </section>
+    </div>
+
+    <div class="col right">
+      <section class="card">
+        <div class="visit">
+          <div class="avatar" style="background:var(--primary)"><i class="bi bi-ticket-perforated-fill"></i></div>
+          <div><h5>D-4 · 10/10 (토)</h5><div class="sub">정기권 방문 · 꿈빛 솜사탕</div></div>
+        </div>
+      </section>
+
+      <section class="card verdict">
+        <div class="card-header"><h4>브리핑 검토</h4></div>
+        <div class="card-body">
+          <div class="big">{{VERDICT}}</div>
+          <p class="small" style="margin:.2rem 0 .8rem">{{ATTEMPT}}회차에서 기준 1~6 검토 (최대 3회)</p>
+          <span class="badge bg-danger"><i class="bi bi-car-front-fill"></i>발렛 미확보</span>
+          <span class="badge bg-warning"><i class="bi bi-clock-fill"></i>출발시간 산출 불가</span>
+        </div>
+      </section>
+
+      <section class="card" id="prep">
+        <div class="card-header"><h4>준비해야 할 것들</h4><span class="meta" id="prog-text">0 / {{N_CHECKS}}</span></div>
+        <div class="card-body">
+          <div class="progress"><span id="prog" style="width:0"></span></div>
+          <ul class="list" id="checklist">{{CHECKS}}</ul>
+        </div>
+      </section>
+
+      <section class="card" id="food">
+        <div class="card-header"><h4>식당 정보</h4></div>
+        <div class="card-body">{{RESTS}}<p class="small">{{REST_NOTE}}</p></div>
+      </section>
+
+      <section class="card" id="send">
+        <div class="card-header"><h4>휴대폰으로 보내기</h4><span class="badge bg-warning" style="margin-left:auto">데모</span></div>
+        <div class="card-body">
+          <form class="send" id="sendForm">
+            <input type="tel" id="phone" placeholder="010-0000-0000" inputmode="numeric" autocomplete="off">
+            <button class="btn" type="submit"><i class="bi bi-send-fill"></i>페이지 전송</button>
+          </form>
+          <p class="toast" id="toast"></p>
+          <p class="small">실제 문자 발송 서비스와 연결되어 있지 않아요.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>출처: 에버랜드 공식 웹 공개 조회·스마트예약(로그인), 네이버 플레이스, 웹 검색 · 기상청·카카오 API 키 미발급으로 일부 대체/산출 불가 · 레이아웃: Mazer 스타일 참고</footer>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  try{ var saved=localStorage.getItem('nav-theme'); if(saved) root.setAttribute('data-theme',saved); }catch(e){}
+  document.getElementById('themeSwitch').addEventListener('click',function(){
+    var dark=root.getAttribute('data-theme')==='dark' || (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next=dark?'light':'dark'; root.setAttribute('data-theme',next);
+    try{ localStorage.setItem('nav-theme',next); }catch(e){}
+  });
+  var boxes=document.querySelectorAll('#checklist input');
+  function update(){
+    var done=0;
+    boxes.forEach(function(b){ b.nextElementSibling.classList.toggle('done',b.checked); if(b.checked)done++; });
+    document.getElementById('prog').style.width=(boxes.length?done/boxes.length*100:0)+'%';
+    document.getElementById('prog-text').textContent=done+' / '+boxes.length;
+  }
+  boxes.forEach(function(b){ b.addEventListener('change',update); });
+  update();
+  document.getElementById('sendForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=document.getElementById('phone').value.replace(/[^0-9]/g,'');
+    var t=document.getElementById('toast');
+    t.style.display='block';
+    if(!/^01[0-9]{8,9}$/.test(v)){ t.style.color='var(--danger)'; t.textContent='휴대폰 번호 형식을 확인해 주세요.'; return; }
+    t.style.color='var(--success)';
+    t.textContent='(데모) '+v.replace(/(\d{3})(\d{3,4})(\d{4})/,'$1-$2-$3')+' 번호로 전송을 요청했어요. 실제로 발송되지는 않아요.';
+  });
+  function closeMenu(){document.body.classList.remove('menu-open');}
+  document.getElementById('burger').addEventListener('click',function(){document.body.classList.add('menu-open');});
+  document.getElementById('overlay').addEventListener('click',closeMenu);
+  var items=document.querySelectorAll('.sidebar-item');
+  items.forEach(function(li){ li.querySelector('a').addEventListener('click',function(){ items.forEach(function(x){x.classList.remove('active')}); li.classList.add('active'); closeMenu(); }); });
+})();
+</script>
+</body>
+</html>
